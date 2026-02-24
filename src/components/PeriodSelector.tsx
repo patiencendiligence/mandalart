@@ -15,6 +15,7 @@ interface PeriodSelectorProps {
   onPeriodChange: (period: 'monthly' | 'yearly') => void;
   onYearChange: (year: number) => void;
   onMonthChange: (month: number) => void;
+  onInfoPress?: () => void;
 }
 
 const MONTHS = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
@@ -26,30 +27,39 @@ export function PeriodSelector({
   onPeriodChange,
   onYearChange,
   onMonthChange,
+  onInfoPress,
 }: PeriodSelectorProps) {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
   return (
     <View style={styles.container}>
-      {/* 기간 타입 선택 */}
-      <View style={styles.periodToggle}>
-        <TouchableOpacity
-          style={[styles.toggleButton, period === 'monthly' && styles.toggleButtonActive]}
-          onPress={() => onPeriodChange('monthly')}
-        >
-          <Text style={[styles.toggleText, period === 'monthly' && styles.toggleTextActive]}>
-            월간
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, period === 'yearly' && styles.toggleButtonActive]}
-          onPress={() => onPeriodChange('yearly')}
-        >
-          <Text style={[styles.toggleText, period === 'yearly' && styles.toggleTextActive]}>
-            연간
-          </Text>
-        </TouchableOpacity>
+      {/* 헤더: 기간 토글 + 정보 버튼 */}
+      <View style={styles.headerRow}>
+        <View style={styles.periodToggle}>
+          <TouchableOpacity
+            style={[styles.toggleButton, period === 'monthly' && styles.toggleButtonActive]}
+            onPress={() => onPeriodChange('monthly')}
+          >
+            <Text style={[styles.toggleText, period === 'monthly' && styles.toggleTextActive]}>
+              월간
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleButton, period === 'yearly' && styles.toggleButtonActive]}
+            onPress={() => onPeriodChange('yearly')}
+          >
+            <Text style={[styles.toggleText, period === 'yearly' && styles.toggleTextActive]}>
+              연간
+            </Text>
+          </TouchableOpacity>
+        </View>
+        
+        {onInfoPress && (
+          <TouchableOpacity style={styles.infoButton} onPress={onInfoPress}>
+            <Text style={styles.infoButtonText}>?</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* 연도 선택 */}
@@ -104,17 +114,22 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: MANDALART_COLORS.common.border,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
   periodToggle: {
     flexDirection: 'row',
-    alignSelf: 'center',
     backgroundColor: MANDALART_COLORS.common.surfaceLight,
     borderRadius: 20,
     padding: 4,
-    marginBottom: 12,
   },
   toggleButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 6,
     borderRadius: 16,
   },
   toggleButtonActive: {
@@ -127,6 +142,19 @@ const styles = StyleSheet.create({
   },
   toggleTextActive: {
     color: MANDALART_COLORS.common.text,
+  },
+  infoButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: MANDALART_COLORS.common.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  infoButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: MANDALART_COLORS.main.text,
   },
   yearScroll: {
     marginBottom: 8,

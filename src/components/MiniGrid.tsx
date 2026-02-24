@@ -13,6 +13,7 @@ interface MiniGridProps {
   onCellPress?: (type: 'main' | 'subGoal' | 'action', subGoalIndex: number, actionIndex?: number) => void;
   onGridPress?: () => void;
   size?: 'mini' | 'normal';
+  gridSize?: number;
 }
 
 export function MiniGrid({
@@ -24,9 +25,10 @@ export function MiniGrid({
   onCellPress,
   onGridPress,
   size = 'normal',
+  gridSize = 145,
 }: MiniGridProps) {
   const colors = getSubGoalColor(subGoalIndex);
-  const cellSize = size === 'mini' ? 'small' : 'medium';
+  const cellSize = (gridSize - 4) / 3; // 3x3 그리드에 맞춰 계산 (padding 제외)
 
   // 메인 그리드 (중앙 3x3): 중앙에 메인목표, 주변에 세부목표들
   if (isMainGrid) {
@@ -43,7 +45,7 @@ export function MiniGrid({
     ];
 
     return (
-      <View style={[styles.grid, styles.mainGrid]}>
+      <View style={[styles.grid, styles.mainGrid, { width: gridSize, height: gridSize }]}>
         {gridItems.map((item, idx) => {
           if (item.type === 'main') {
             return (
@@ -53,7 +55,7 @@ export function MiniGrid({
                 type="main"
                 isCenter
                 onPress={() => onCellPress?.('main', -1)}
-                size={cellSize}
+                cellSize={cellSize}
               />
             );
           }
@@ -65,7 +67,7 @@ export function MiniGrid({
               type="subGoal"
               subGoalIndex={item.index}
               onPress={() => onCellPress?.('subGoal', item.index)}
-              size={cellSize}
+              cellSize={cellSize}
             />
           );
         })}
@@ -78,7 +80,7 @@ export function MiniGrid({
 
   return (
     <TouchableOpacity
-      style={[styles.grid, { backgroundColor: colors.bg + '30' }]}
+      style={[styles.grid, { backgroundColor: colors.bg + '30', width: gridSize, height: gridSize }]}
       onPress={onGridPress}
       activeOpacity={0.8}
     >
@@ -92,7 +94,7 @@ export function MiniGrid({
               subGoalIndex={subGoalIndex}
               isCenter
               onPress={() => onCellPress?.('subGoal', subGoalIndex)}
-              size={cellSize}
+              cellSize={cellSize}
             />
           );
         }
@@ -105,7 +107,7 @@ export function MiniGrid({
             subGoalIndex={subGoalIndex}
             completed={action?.completed}
             onPress={() => onCellPress?.('action', subGoalIndex, actionIdx)}
-            size={cellSize}
+            cellSize={cellSize}
           />
         );
       })}
@@ -117,16 +119,15 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    width: 145,
-    height: 145,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
-    padding: 2,
+    borderRadius: 4,
+    padding: 0,
+    aspectRatio: 1,
   },
   mainGrid: {
     backgroundColor: MANDALART_COLORS.common.surface,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: MANDALART_COLORS.main.border,
   },
 });

@@ -16,6 +16,7 @@ interface CellProps {
   completed?: boolean;
   onPress?: () => void;
   size?: 'small' | 'medium' | 'large';
+  cellSize?: number;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -28,13 +29,13 @@ export function Cell({
   completed = false,
   onPress,
   size = 'medium',
+  cellSize = 45,
 }: CellProps) {
   const colors = type === 'main' 
     ? MANDALART_COLORS.main 
     : getSubGoalColor(subGoalIndex);
   
-  const cellSize = size === 'small' ? 28 : size === 'large' ? 80 : 45;
-  const fontSize = size === 'small' ? 8 : size === 'large' ? 14 : 10;
+  const fontSize = Math.max(8, cellSize * 0.2);
   
   const dynamicStyles = {
     cell: {
@@ -78,20 +79,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 0.5,
-    borderRadius: 4,
-    padding: 2,
-    margin: 1,
+    borderRadius: 2,
+    padding: 1,
+    margin: 0,
   },
   centerCell: {
-    borderWidth: 2,
+    borderWidth: 1,
   },
   mainCell: {
-    borderWidth: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderWidth: 1,
   },
   text: {
     fontWeight: '500',
