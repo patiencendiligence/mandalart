@@ -11,6 +11,11 @@ interface MandalartGridProps {
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// 화면 가로에 9x9 그리드가 들어가야 함 (3x3 메인그리드 x 3x3 서브셀)
+// 따라서 MINI_GRID_SIZE = SCREEN_WIDTH / 3 (각 큰 그리드가 가로 1/3 차지)
+// 각 큰 그리드 내 셀 = (MINI_GRID_SIZE - 간격) / 3
+const PADDING = 8;
+const MINI_GRID_SIZE = (SCREEN_WIDTH - PADDING * 2) / 3; // 큰 그리드 하나의 크기
 
 export function MandalartGrid({
   data,
@@ -32,13 +37,8 @@ export function MandalartGrid({
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
-      horizontal
-      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={true}
     >
-      <ScrollView
-        contentContainerStyle={styles.gridContainer}
-        showsVerticalScrollIndicator={false}
-      >
         {gridLayout.map((row, rowIdx) => (
           <View key={`row-${rowIdx}`} style={styles.row}>
             {row.map((gridIdx) => {
@@ -53,6 +53,7 @@ export function MandalartGrid({
                     mainGoal={data.mainGoal}
                     allSubGoals={data.subGoals}
                     onCellPress={onCellPress}
+                    gridSize={MINI_GRID_SIZE}
                   />
                 );
               }
@@ -66,12 +67,12 @@ export function MandalartGrid({
                   subGoalIndex={gridIdx}
                   onCellPress={onCellPress}
                   onGridPress={() => onSubGoalGridPress(gridIdx)}
+                  gridSize={MINI_GRID_SIZE}
                 />
               );
             })}
           </View>
         ))}
-      </ScrollView>
     </ScrollView>
   );
 }
@@ -83,20 +84,18 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingVertical: 20,
-  },
-  gridContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: PADDING,
   },
   row: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
     marginVertical: 2,
+    width: '100%',
   },
 });
 

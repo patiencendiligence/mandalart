@@ -10,6 +10,7 @@ import {
 import { MandalartGrid } from '../components/MandalartGrid';
 import { EditModal } from '../components/EditModal';
 import { DetailModal } from '../components/DetailModal';
+import { InfoModal } from '../components/InfoModal';
 import { PeriodSelector } from '../components/PeriodSelector';
 import { useMandalart } from '../hooks/useMandalart';
 import { SelectedCell } from '../types/mandalart';
@@ -35,6 +36,7 @@ export function HomeScreen() {
   // 모달 상태
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [selectedSubGoalIndex, setSelectedSubGoalIndex] = useState<number>(0);
 
@@ -104,7 +106,7 @@ export function HomeScreen() {
       
       {/* 헤더 */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>만다라트</Text>
+        {/* <Text style={styles.headerTitle}>만다라트</Text> */}
         <Text style={styles.headerSubtitle}>
           {period === 'yearly' ? `${year}년 목표` : `${year}년 ${month}월 목표`}
         </Text>
@@ -124,6 +126,7 @@ export function HomeScreen() {
         onPeriodChange={setPeriod}
         onYearChange={setYear}
         onMonthChange={setMonth}
+        onInfoPress={() => setInfoModalVisible(true)}
       />
 
       {/* 메인 그리드 */}
@@ -163,6 +166,12 @@ export function HomeScreen() {
         subGoalIndex={selectedSubGoalIndex}
         onClose={handleCloseDetailModal}
         onCellPress={handleDetailCellPress}
+      />
+
+      {/* 정보 모달 */}
+      <InfoModal
+        visible={infoModalVisible}
+        onClose={() => setInfoModalVisible(false)}
       />
     </SafeAreaView>
   );
