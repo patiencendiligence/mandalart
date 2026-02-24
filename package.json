@@ -1,0 +1,35 @@
+{
+  "name": "mandalart-app",
+  "version": "1.0.0",
+  "description": "만다라트 목표 계획 앱 - 오타니 쇼헤이의 목표 달성법",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios"
+  },
+  "keywords": [
+    "mandalart",
+    "goal",
+    "planning",
+    "react-native",
+    "expo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.1.2",
+    "expo": "^53.0.0",
+    "react": "^19.0.0",
+    "react-native": "^0.79.0",
+    "react-native-gesture-handler": "^2.24.0",
+    "react-native-reanimated": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}
