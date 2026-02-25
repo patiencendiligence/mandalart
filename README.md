@@ -27,7 +27,7 @@
 ### 설치
 
 ```bash
-cd mandalart-app
+cd mandalart
 npm install
 ```
 
@@ -69,7 +69,7 @@ npm run build:ios
 ## 📂 프로젝트 구조
 
 ```
-mandalart-app/
+mandalart/
 ├── App.tsx                 # 앱 진입점
 ├── src/
 │   ├── components/         # UI 컴포넌트
