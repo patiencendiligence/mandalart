@@ -22,6 +22,9 @@ export function MandalartGrid({
   onCellPress,
   onSubGoalGridPress,
 }: MandalartGridProps) {
+  // 모든 세부목표(1~8)가 비어있는지 확인
+  const allSubGoalsEmpty = data.subGoals.slice(1).every(sg => !sg.text.trim());
+
   // 9x9 그리드 배치
   // 위치: [0][1][2]
   //       [3][중앙][4]
@@ -42,6 +45,7 @@ export function MandalartGrid({
         {gridLayout.map((row, rowIdx) => (
           <View key={`row-${rowIdx}`} style={styles.row}>
             {row.map((gridIdx) => {
+              console.log('Rendering grid cell:', { gridIdx, subGoal: data.subGoals[gridIdx] });
               if (gridIdx === -1) {
                 // 중앙 메인 그리드
                 return (
@@ -60,6 +64,12 @@ export function MandalartGrid({
               
               // 세부목표 그리드
               const subGoal = data.subGoals[gridIdx];
+              
+              // 세부목표가 비어있고 전부 비어있으면 미노출
+              if (!subGoal.text.trim() && allSubGoalsEmpty) {
+                return null;
+              }
+
               return (
                 <MiniGrid
                   key={`subgoal-grid-${gridIdx}`}

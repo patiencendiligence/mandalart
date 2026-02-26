@@ -17,6 +17,7 @@ interface CellProps {
   onPress?: () => void;
   size?: 'small' | 'medium' | 'large';
   cellSize?: number;
+  noBorder?: boolean;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -30,6 +31,7 @@ export function Cell({
   onPress,
   size = 'medium',
   cellSize = 45,
+  noBorder = false,
 }: CellProps) {
   const colors = type === 'main' 
     ? MANDALART_COLORS.main 
@@ -44,6 +46,7 @@ export function Cell({
       backgroundColor: isCenter ? colors.bg : (type === 'main' ? colors.bg : colors.bg),
       borderColor: colors.border,
       opacity: completed ? 0.6 : 1,
+      borderWidth: noBorder ? 0 : undefined,
     },
     text: {
       color: colors.text,
@@ -79,16 +82,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 0.5,
-    borderRadius: 2,
+    borderRadius: 4,
     padding: 1,
     margin: 0,
   },
+  
   centerCell: {
     borderWidth: 1,
   },
   mainCell: {
     borderWidth: 1,
   },
+
   text: {
     fontWeight: '500',
     textAlign: 'center',
