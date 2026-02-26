@@ -35,6 +35,7 @@ export function MandalartGrid({
     [3, -1, 4], // -1은 중앙 메인 그리드
     [5, 6, 7],
   ];
+  
 
   return (
     <ScrollView
