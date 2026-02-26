@@ -3,7 +3,7 @@ import { MandalartData, SubGoal, ActionItem } from '../types/mandalart';
 import { loadOrCreateMandalart, saveMandalart } from '../storage/mandalartStorage';
 
 export function useMandalart(period: 'monthly' | 'yearly', year: number, month?: number) {
-  const [data, setData] = useState<MandalartData | null>(null);
+  const [data, setData] = useState<MandalartData>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 

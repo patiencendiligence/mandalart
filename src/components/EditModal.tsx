@@ -17,8 +17,8 @@ import { MANDALART_COLORS, getSubGoalColor } from '../utils/colors';
 
 interface EditModalProps {
   visible: boolean;
-  selectedCell: SelectedCell | null;
-  data: MandalartData | null;
+  selectedCell?: SelectedCell;
+  data?: MandalartData;
   onClose: () => void;
   onSaveMain: (text: string) => void;
   onSaveSubGoal: (index: number, text: string) => void;
@@ -81,7 +81,7 @@ export function EditModal({
 
   const handleSave = () => {
     if (!selectedCell) return;
-
+    if (text.trim().length === 0) return;
     if (selectedCell.type === 'main') {
       onSaveMain(text);
     } else if (selectedCell.type === 'subGoal' && selectedCell.subGoalIndex !== undefined) {
@@ -96,7 +96,8 @@ export function EditModal({
     onClose();
   };
 
-  const handleToggle = () => {
+
+  const handleComplete = () => {
     if (
       selectedCell?.type === 'action' &&
       selectedCell.subGoalIndex !== undefined &&
@@ -113,7 +114,7 @@ export function EditModal({
       case 'main':
         return '🎯 최종 목표';
       case 'subGoal':
-        return `📋 세부목표 ${(selectedCell.subGoalIndex ?? 0) + 1}`;
+        return `세부목표 ${(selectedCell.subGoalIndex ?? 0) + 1}`;
       case 'action':
         return `✓ 실행계획`;
       default:
@@ -139,6 +140,10 @@ export function EditModal({
     ? MANDALART_COLORS.main
     : getSubGoalColor(selectedCell?.subGoalIndex ?? 0);
 
+  // safe accent resolution: some color objects may not have `accent` typed,
+  // so prefer explicit runtime check to avoid TypeScript property errors.
+  const accentColor = (colors as any)?.accent ?? colors.text ?? colors.bg;
+
   return (
     <Modal
       visible={visible}
@@ -156,6 +161,7 @@ export function EditModal({
           style={[
             styles.modalContainer,
             { transform: [{ translateY: slideAnim }] },
+            selectedCell?.type === 'subGoal' && data?.subGoals[selectedCell.subGoalIndex ?? 0]?.actions?.every(a => a.completed) ? styles.blob : null,
           ]}
         >
           <View style={[styles.header, { backgroundColor: colors.bg }]}>
@@ -179,27 +185,55 @@ export function EditModal({
               blurOnSubmit
             />
 
-            {selectedCell?.type === 'action' && (
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>완료됨</Text>
-                <Switch
-                  value={isCompleted}
-                  onValueChange={handleToggle}
-                  trackColor={{ 
-                    false: MANDALART_COLORS.common.border, 
-                    true: MANDALART_COLORS.common.success 
-                  }}
-                  thumbColor="#ffffff"
-                />
-              </View>
-            )}
 
-            <TouchableOpacity
-              style={[styles.saveButton, { backgroundColor: colors.text || colors.accent }]}
-              onPress={handleSave}
-            >
-              <Text style={styles.saveButtonText}>저장</Text>
-            </TouchableOpacity>
+            {/* Hide save button if all actions are completed for subGoal */}
+            {(() => {
+              if (selectedCell?.type === 'subGoal' && data && typeof selectedCell.subGoalIndex === 'number') {
+                const subGoal = data.subGoals[selectedCell.subGoalIndex];
+                if (subGoal && Array.isArray(subGoal.actions) && subGoal.actions.length > 0 && subGoal.actions.every(a => a.completed)) {
+                  return null;
+                }
+              }
+              // {selectedCell?.type === 'action' && (() => {
+              // if (
+              //   text.trim().length === 0 ||
+              //   !(selectedCell && data && typeof selectedCell.subGoalIndex === 'number' && typeof selectedCell.actionIndex === 'number')
+              // ) {
+              //   return null;
+              // }
+              const saved = (selectedCell?.subGoalIndex != null && selectedCell?.actionIndex != null)
+  ? data?.subGoals[selectedCell.subGoalIndex]?.actions[selectedCell.actionIndex]?.text ?? false
+  : false;
+              if (text !== saved)  {
+                return (
+                  <TouchableOpacity
+                    style={[styles.saveButton, { backgroundColor: 'rgba(217, 217, 217, 0.2)'}]}
+                    onPress={handleSave}
+                  >
+                    <Text style={styles.saveButtonText}>저장</Text>
+                  </TouchableOpacity>
+                );
+              } else {
+                return (
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+                    <TouchableOpacity
+                      style={[styles.saveButton, { backgroundColor: 'rgba(172, 172, 172, 0.69)', width: '48%'}]}
+                      onPress={handleSave}
+                    >
+                      <Text style={styles.saveButtonText}>수정</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.saveButton, { backgroundColor: 'rgba(40, 31, 31, 0.59)', width: '48%'}]}
+                      onPress={handleComplete}
+                    >
+                      <Text style={styles.saveButtonText}>완료</Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              }
+
+            })()}
+              
           </View>
         </Animated.View>
       </KeyboardAvoidingView>
@@ -208,6 +242,17 @@ export function EditModal({
 }
 
 const styles = StyleSheet.create({
+    blob: {
+      borderRadius: 32,
+      shadowColor: '#c9c9c9',
+      shadowOffset: { width: 10, height: 10 },
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      elevation: 8,
+      backgroundColor: 'rgba(255,255,255,0.22)',
+      borderWidth: 2,
+      borderColor: '#e0e0e0',
+    },
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -217,11 +262,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   modalContainer: {
-    backgroundColor: MANDALART_COLORS.common.surface,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     minHeight: 300,
     overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.35)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 8,
+    // iOS only: backdrop blur
+    // Android: fallback to backgroundColor
   },
   header: {
     flexDirection: 'row',
@@ -229,6 +283,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderBottomWidth: 0
   },
   title: {
     fontSize: 18,
@@ -250,7 +308,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   input: {
-    backgroundColor: MANDALART_COLORS.common.surfaceLight,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
@@ -283,4 +341,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-

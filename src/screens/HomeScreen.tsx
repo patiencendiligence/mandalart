@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import { MandalartGrid } from '../components/MandalartGrid';
 import { EditModal } from '../components/EditModal';
 import { DetailModal } from '../components/DetailModal';
 import { InfoModal } from '../components/InfoModal';
+import { OnboardingModal } from '../components/OnboardingModal';
 import { PeriodSelector } from '../components/PeriodSelector';
 import { useMandalart } from '../hooks/useMandalart';
 import { SelectedCell } from '../types/mandalart';
@@ -37,7 +38,8 @@ export function HomeScreen() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
+  const [onboardingVisible, setOnboardingVisible] = useState(false);
+  const [selectedCell, setSelectedCell] = useState<SelectedCell>();
   const [selectedSubGoalIndex, setSelectedSubGoalIndex] = useState<number>(0);
 
   // 셀 클릭 핸들러
@@ -59,7 +61,7 @@ export function HomeScreen() {
   // 모달 닫기
   const handleCloseEditModal = useCallback(() => {
     setEditModalVisible(false);
-    setSelectedCell(null);
+    setSelectedCell(undefined);
   }, []);
 
   const handleCloseDetailModal = useCallback(() => {
@@ -100,80 +102,99 @@ export function HomeScreen() {
     await toggleActionComplete(subGoalIndex, actionIndex);
   }, [toggleActionComplete]);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={MANDALART_COLORS.common.background} />
-      
-      {/* 헤더 */}
-      <View style={styles.header}>
-        {/* <Text style={styles.headerTitle}>만다라트</Text> */}
-        <Text style={styles.headerSubtitle}>
-          {period === 'yearly' ? `${year}년 목표` : `${year}년 ${month}월 목표`}
-        </Text>
-        {saving && (
-          <View style={styles.savingIndicator}>
-            <ActivityIndicator size="small" color={MANDALART_COLORS.common.success} />
-            <Text style={styles.savingText}>저장 중...</Text>
-          </View>
-        )}
-      </View>
+  // 목표 없을 때 온보딩 체크
+  const hasMainGoal = data?.mainGoal && data.mainGoal.trim().length > 0;
+  const shouldShowOnboarding = !loading && !hasMainGoal && !!onboardingVisible;
 
-      {/* 기간 선택 */}
-      <PeriodSelector
+  const handleOnboardingSubmit = useCallback(async (mainGoal: string) => {
+    await updateMainGoal(mainGoal);
+  }, [updateMainGoal]);
+
+  return (
+    <>
+      <OnboardingModal
+        visible={shouldShowOnboarding}
         period={period}
         year={year}
         month={month}
-        onPeriodChange={setPeriod}
-        onYearChange={setYear}
-        onMonthChange={setMonth}
-        onInfoPress={() => setInfoModalVisible(true)}
+        onSubmit={handleOnboardingSubmit}
+        onClose={() => setOnboardingVisible(false)}
       />
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor={MANDALART_COLORS.common.background} />
 
-      {/* 메인 그리드 */}
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={MANDALART_COLORS.common.text} />
-          <Text style={styles.loadingText}>불러오는 중...</Text>
+        {/* 헤더 */}
+        <View style={styles.header}>
+          <Text style={styles.headerSubtitle}>
+            {period === 'yearly' ? `${year}년 목표` : `${year}년 ${month}월 목표`}
+          </Text>
+          {saving && (
+            <View style={styles.savingIndicator}>
+              <ActivityIndicator size="small" color={MANDALART_COLORS.common.success} />
+              <Text style={styles.savingText}>저장 중...</Text>
+            </View>
+          )}
         </View>
-      ) : data ? (
-        <MandalartGrid
-          data={data}
-          onCellPress={handleCellPress}
-          onSubGoalGridPress={handleSubGoalGridPress}
+
+        {/* 기간 선택: 항상 렌더링 */}
+        <PeriodSelector
+          period={period}
+          year={year}
+          month={month}
+          onPeriodChange={setPeriod}
+          onYearChange={setYear}
+          onMonthChange={setMonth}
+          onInfoPress={() => setInfoModalVisible(true)}
         />
-      ) : (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>데이터를 불러올 수 없습니다</Text>
-        </View>
-      )}
 
-      {/* 편집 모달 */}
-      <EditModal
-        visible={editModalVisible}
-        selectedCell={selectedCell}
-        data={data}
-        onClose={handleCloseEditModal}
-        onSaveMain={handleSaveMain}
-        onSaveSubGoal={handleSaveSubGoal}
-        onSaveAction={handleSaveAction}
-        onToggleComplete={handleToggleComplete}
-      />
+        {/* 메인 그리드 */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={MANDALART_COLORS.common.text} />
+            <Text style={styles.loadingText}>불러오는 중...</Text>
+          </View>
+        ) : !shouldShowOnboarding && data ? (
+          <MandalartGrid
+            data={data}
+            onCellPress={handleCellPress}
+            onSubGoalGridPress={handleSubGoalGridPress}
+          />
+        ) : !shouldShowOnboarding ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>데이터를 불러올 수 없습니다</Text>
+          </View>
+        ) : (
+          <View style={styles.emptyContainer} />
+        )}
 
-      {/* 상세 모달 (줌인 뷰) */}
-      <DetailModal
-        visible={detailModalVisible}
-        subGoal={data?.subGoals[selectedSubGoalIndex] ?? null}
-        subGoalIndex={selectedSubGoalIndex}
-        onClose={handleCloseDetailModal}
-        onCellPress={handleDetailCellPress}
-      />
+        {/* 편집 모달 */}
+        <EditModal
+          visible={editModalVisible}
+          selectedCell={selectedCell}
+          data={data}
+          onClose={handleCloseEditModal}
+          onSaveMain={handleSaveMain}
+          onSaveSubGoal={handleSaveSubGoal}
+          onSaveAction={handleSaveAction}
+          onToggleComplete={handleToggleComplete}
+        />
 
-      {/* 정보 모달 */}
-      <InfoModal
-        visible={infoModalVisible}
-        onClose={() => setInfoModalVisible(false)}
-      />
-    </SafeAreaView>
+        {/* 상세 모달 (줌인 뷰) */}
+        <DetailModal
+          visible={detailModalVisible}
+          subGoal={data?.subGoals[selectedSubGoalIndex] ?? null}
+          subGoalIndex={selectedSubGoalIndex}
+          onClose={handleCloseDetailModal}
+          onCellPress={handleDetailCellPress}
+        />
+
+        {/* 정보 모달 */}
+        <InfoModal
+          visible={infoModalVisible}
+          onClose={() => setInfoModalVisible(false)}
+        />
+      </SafeAreaView>
+    </>
   );
 }
 
@@ -220,6 +241,9 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: MANDALART_COLORS.common.textSecondary,
+  },
+  emptyContainer: {
+    flex: 1,
   },
   errorContainer: {
     flex: 1,

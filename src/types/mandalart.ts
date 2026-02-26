@@ -34,7 +34,7 @@ export type ZoomLevel = 'daily' | 'weekly' | 'monthly';
 
 // 선택된 셀 정보
 export interface SelectedCell {
-  type: 'main' | 'subGoal' | 'action';
+  type?: 'main' | 'subGoal' | 'action';
   subGoalIndex?: number; // 세부목표 인덱스 (0-7)
   actionIndex?: number; // 액션 인덱스 (0-7)
 }

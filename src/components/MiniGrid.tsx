@@ -29,6 +29,13 @@ export function MiniGrid({
 }: MiniGridProps) {
   const colors = getSubGoalColor(subGoalIndex);
   const cellSize = (gridSize - 4) / 3; // 3x3 그리드에 맞춰 계산 (padding 제외)
+  // 모든 실행계획이 완료되었는지 확인 (blob 효과)
+  const isGridComplete = (() => {
+    if (!subGoal) return false;
+    if (!subGoal.actions || subGoal.actions.length !== 8) return false;
+    return subGoal.actions.every(a => a && a.completed);
+  })();
+
 
   // 메인 그리드 (중앙 3x3): 중앙에 메인목표, 주변에 세부목표들
   if (isMainGrid) {
@@ -44,8 +51,11 @@ export function MiniGrid({
       { type: 'subGoal' as const, index: 7 },
     ];
 
+    // 메인 그리드 완성 조건: mainGoal이 비어있지 않고, allSubGoals의 text가 모두 채워졌을 때
+    const isMainGridComplete = mainGoal && allSubGoals.length === 8 && allSubGoals.every(sg => sg && sg.text && sg.text.trim() !== '');
+
     return (
-      <View style={[styles.grid, styles.mainGrid, { width: gridSize, height: gridSize }]}>
+      <View style={[styles.grid, styles.mainGrid, { width: gridSize, height: gridSize }, isMainGridComplete && styles.blob]}> 
         {gridItems.map((item, idx) => {
           if (item.type === 'main') {
             return (
@@ -56,6 +66,7 @@ export function MiniGrid({
                 isCenter
                 onPress={() => onCellPress?.('main', -1)}
                 cellSize={cellSize}
+                noBorder={!!isMainGridComplete}
               />
             );
           }
@@ -68,19 +79,24 @@ export function MiniGrid({
               subGoalIndex={item.index}
               onPress={() => onCellPress?.('subGoal', item.index)}
               cellSize={cellSize}
+              noBorder={!!isMainGridComplete}
             />
           );
         })}
       </View>
     );
   }
-
+   
   // 세부목표 그리드 (외곽 3x3): 중앙에 세부목표, 주변에 액션들
   const actionPositions = [0, 1, 2, 3, -1, 4, 5, 6, 7]; // -1은 중앙(세부목표)
 
   return (
     <TouchableOpacity
-      style={[styles.grid, { backgroundColor: colors.bg + '30', width: gridSize, height: gridSize }]}
+      style={[
+        styles.grid,
+        { backgroundColor: colors.bg + '30', width: gridSize, height: gridSize },
+        isGridComplete && styles.blob,
+      ]}
       onPress={onGridPress}
       activeOpacity={0.8}
     >
@@ -95,6 +111,7 @@ export function MiniGrid({
               isCenter
               onPress={() => onCellPress?.('subGoal', subGoalIndex)}
               cellSize={cellSize}
+              noBorder={!!isGridComplete}
             />
           );
         }
@@ -108,6 +125,7 @@ export function MiniGrid({
             completed={action?.completed}
             onPress={() => onCellPress?.('action', subGoalIndex, actionIdx)}
             cellSize={cellSize}
+            noBorder={!!isGridComplete}
           />
         );
       })}
@@ -130,5 +148,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: MANDALART_COLORS.main.border,
   },
+  blob: {
+    borderRadius: 60,
+    shadowColor: '#c9c9c9',
+    shadowOffset: { width: 10, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+    backgroundColor: 'transparent',
+  }
+
 });
 
