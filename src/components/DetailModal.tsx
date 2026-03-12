@@ -182,7 +182,11 @@ export function DetailModal({
               )}
             </View>
             
-            <View style={[styles.grid, { width: actualGridWidth }]}>
+            <View style={[
+              styles.grid, 
+              { width: actualGridWidth },
+              allActionsCompleted && styles.gridAllCompleted,
+            ]}>
               {[0, 1, 2].map((rowIdx) => (
                 <View key={`row-${rowIdx}`} style={styles.gridRow}>
                   {[0, 1, 2].map((colIdx) => {
@@ -190,9 +194,17 @@ export function DetailModal({
                     const actionIdx = actionPositions[gridIdx];
                     const mergeInfo = getAdjacentMergeInfo(gridIdx, completedMap);
                     
-                    const baseMargin = GRID_GAP / 2;
+                    const baseMargin = allActionsCompleted ? 0 : GRID_GAP / 2;
                     
                     if (actionIdx === -1) {
+                      // 전체 완료시 중앙 셀 스타일
+                      const centerCellCompletedStyle = allActionsCompleted ? {
+                        borderRadius: 0,
+                        backgroundColor: 'transparent',
+                        shadowOpacity: 0,
+                        elevation: 0,
+                      } : {};
+                      
                       return (
                         <TouchableOpacity
                           key="center"
@@ -203,7 +215,8 @@ export function DetailModal({
                               height: cellSize,
                               borderRadius: cellBorderRadius,
                               margin: baseMargin,
-                            }
+                            },
+                            centerCellCompletedStyle,
                           ]}
                           onPress={() => onCellPress('subGoal', subGoalIndex)}
                           activeOpacity={0.8}
@@ -225,23 +238,42 @@ export function DetailModal({
                       borderRadius: cellBorderRadius,
                     };
                     
-                    // 완료된 셀의 연결 스타일 (borderRadius + border + margin)
-                    const mergeStyles = isCompleted ? {
-                      borderTopLeftRadius: (mergeInfo.mergeTop || mergeInfo.mergeLeft) ? 4 : cellBorderRadius,
-                      borderTopRightRadius: (mergeInfo.mergeTop || mergeInfo.mergeRight) ? 4 : cellBorderRadius,
-                      borderBottomLeftRadius: (mergeInfo.mergeBottom || mergeInfo.mergeLeft) ? 4 : cellBorderRadius,
-                      borderBottomRightRadius: (mergeInfo.mergeBottom || mergeInfo.mergeRight) ? 4 : cellBorderRadius,
-                      borderTopWidth: mergeInfo.mergeTop ? 0 : 1.5,
-                      borderBottomWidth: mergeInfo.mergeBottom ? 0 : 1.5,
-                      borderLeftWidth: mergeInfo.mergeLeft ? 0 : 1.5,
-                      borderRightWidth: mergeInfo.mergeRight ? 0 : 1.5,
-                      marginTop: mergeInfo.mergeTop ? 0 : baseMargin,
-                      marginBottom: mergeInfo.mergeBottom ? 0 : baseMargin,
-                      marginLeft: mergeInfo.mergeLeft ? 0 : baseMargin,
-                      marginRight: mergeInfo.mergeRight ? 0 : baseMargin,
-                    } : {
-                      margin: baseMargin,
-                    };
+                    // 전체 완료 시 모든 셀을 하나의 영역으로 통합
+                    let mergeStyles: any;
+                    if (allActionsCompleted) {
+                      mergeStyles = {
+                        borderRadius: 0,
+                        borderWidth: 0,
+                        margin: 0,
+                        backgroundColor: 'transparent',
+                        shadowOpacity: 0,
+                        elevation: 0,
+                        // 모서리 셀만 borderRadius 유지
+                        ...(gridIdx === 0 && { borderTopLeftRadius: cellBorderRadius }),
+                        ...(gridIdx === 2 && { borderTopRightRadius: cellBorderRadius }),
+                        ...(gridIdx === 6 && { borderBottomLeftRadius: cellBorderRadius }),
+                        ...(gridIdx === 8 && { borderBottomRightRadius: cellBorderRadius }),
+                      };
+                    } else if (isCompleted) {
+                      mergeStyles = {
+                        borderTopLeftRadius: (mergeInfo.mergeTop || mergeInfo.mergeLeft) ? 4 : cellBorderRadius,
+                        borderTopRightRadius: (mergeInfo.mergeTop || mergeInfo.mergeRight) ? 4 : cellBorderRadius,
+                        borderBottomLeftRadius: (mergeInfo.mergeBottom || mergeInfo.mergeLeft) ? 4 : cellBorderRadius,
+                        borderBottomRightRadius: (mergeInfo.mergeBottom || mergeInfo.mergeRight) ? 4 : cellBorderRadius,
+                        borderTopWidth: mergeInfo.mergeTop ? 0 : 1.5,
+                        borderBottomWidth: mergeInfo.mergeBottom ? 0 : 1.5,
+                        borderLeftWidth: mergeInfo.mergeLeft ? 0 : 1.5,
+                        borderRightWidth: mergeInfo.mergeRight ? 0 : 1.5,
+                        marginTop: mergeInfo.mergeTop ? 0 : baseMargin,
+                        marginBottom: mergeInfo.mergeBottom ? 0 : baseMargin,
+                        marginLeft: mergeInfo.mergeLeft ? 0 : baseMargin,
+                        marginRight: mergeInfo.mergeRight ? 0 : baseMargin,
+                      };
+                    } else {
+                      mergeStyles = {
+                        margin: baseMargin,
+                      };
+                    }
                     
                     return (
                       <TouchableOpacity
@@ -393,6 +425,16 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'column',
     alignItems: 'center',
+  },
+  gridAllCompleted: {
+    backgroundColor: 'rgba(187, 187, 188, 0.22)',
+    borderRadius: 20,
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
   },
   gridRow: {
     flexDirection: 'row',

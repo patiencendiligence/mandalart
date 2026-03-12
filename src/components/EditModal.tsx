@@ -207,9 +207,9 @@ export function EditModal({
               //   return null;
               // }
               const saved = (selectedCell?.subGoalIndex != null && selectedCell?.actionIndex != null)
-  ? data?.subGoals[selectedCell.subGoalIndex]?.actions[selectedCell.actionIndex]?.text ?? false
-  : false;
-              if (text !== saved)  {
+  ? data?.subGoals[selectedCell.subGoalIndex]?.actions[selectedCell.actionIndex]?.text ?? ''
+  : '';
+              if (text !== saved || !saved) {
                 return (
                   <TouchableOpacity
                     style={[styles.saveButton, { backgroundColor: 'rgba(217, 217, 217, 0.2)'}]}
