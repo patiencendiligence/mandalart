@@ -8,6 +8,7 @@ import {
   Animated,
   ScrollView,
   useWindowDimensions,
+  Platform,
 } from 'react-native';
 import { SubGoal } from '../types/mandalart';
 import { MANDALART_COLORS } from '../utils/colors';
@@ -45,6 +46,15 @@ const getAdjacentMergeInfo = (gridIndex: number, completedMap: boolean[]) => {
 const GRID_GAP = 6;
 const MODAL_HORIZONTAL_MARGIN = 40;
 const MODAL_PADDING = 20;
+
+// 웹에서 backdrop blur 효과
+const webBlurStyle = Platform.select({
+  web: {
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+  },
+  default: {},
+});
 
 export function DetailModal({
   visible,
@@ -215,6 +225,7 @@ export function DetailModal({
                               height: cellSize,
                               borderRadius: cellBorderRadius,
                               margin: baseMargin,
+                              ...webBlurStyle,
                             },
                             centerCellCompletedStyle,
                           ]}
@@ -255,19 +266,37 @@ export function DetailModal({
                         ...(gridIdx === 8 && { borderBottomRightRadius: cellBorderRadius }),
                       };
                     } else if (isCompleted) {
+                      // 연결 방향으로 크기 확장하여 정렬 유지
+                      const extraWidth = (mergeInfo.mergeLeft ? baseMargin : 0) + (mergeInfo.mergeRight ? baseMargin : 0);
+                      const extraHeight = (mergeInfo.mergeTop ? baseMargin : 0) + (mergeInfo.mergeBottom ? baseMargin : 0);
+                      
+                      // Inset 효과: 위/왼쪽에 어두운 border, 아래/오른쪽에 밝은 border
                       mergeStyles = {
-                        borderTopLeftRadius: (mergeInfo.mergeTop || mergeInfo.mergeLeft) ? 4 : cellBorderRadius,
-                        borderTopRightRadius: (mergeInfo.mergeTop || mergeInfo.mergeRight) ? 4 : cellBorderRadius,
-                        borderBottomLeftRadius: (mergeInfo.mergeBottom || mergeInfo.mergeLeft) ? 4 : cellBorderRadius,
-                        borderBottomRightRadius: (mergeInfo.mergeBottom || mergeInfo.mergeRight) ? 4 : cellBorderRadius,
+                        width: cellSize + extraWidth,
+                        height: cellSize + extraHeight,
+                        borderTopLeftRadius: (mergeInfo.mergeTop || mergeInfo.mergeLeft) ? 0 : cellBorderRadius,
+                        borderTopRightRadius: (mergeInfo.mergeTop || mergeInfo.mergeRight) ? 0 : cellBorderRadius,
+                        borderBottomLeftRadius: (mergeInfo.mergeBottom || mergeInfo.mergeLeft) ? 0 : cellBorderRadius,
+                        borderBottomRightRadius: (mergeInfo.mergeBottom || mergeInfo.mergeRight) ? 0 : cellBorderRadius,
+                        // Inset border - 연결되지 않은 방향만 표시
                         borderTopWidth: mergeInfo.mergeTop ? 0 : 1.5,
                         borderBottomWidth: mergeInfo.mergeBottom ? 0 : 1.5,
                         borderLeftWidth: mergeInfo.mergeLeft ? 0 : 1.5,
                         borderRightWidth: mergeInfo.mergeRight ? 0 : 1.5,
+                        // Inset 효과: 위/왼쪽 어둡게, 아래/오른쪽 밝게 (눌린 느낌)
+                        borderTopColor: 'rgba(0, 0, 0, 0.12)',
+                        borderLeftColor: 'rgba(0, 0, 0, 0.1)',
+                        borderBottomColor: 'rgba(255, 255, 255, 0.8)',
+                        borderRightColor: 'rgba(255, 255, 255, 0.7)',
                         marginTop: mergeInfo.mergeTop ? 0 : baseMargin,
                         marginBottom: mergeInfo.mergeBottom ? 0 : baseMargin,
                         marginLeft: mergeInfo.mergeLeft ? 0 : baseMargin,
                         marginRight: mergeInfo.mergeRight ? 0 : baseMargin,
+                        // Inset 반투명 배경색
+                        backgroundColor: 'rgba(180, 200, 230, 0.4)',
+                        // 외부 shadow 제거
+                        shadowOpacity: 0,
+                        elevation: 0,
                       };
                     } else {
                       mergeStyles = {
@@ -283,6 +312,7 @@ export function DetailModal({
                           baseCellStyle,
                           isCompleted && styles.actionCellCompleted,
                           mergeStyles,
+                          webBlurStyle,
                         ]}
                         onPress={() => onCellPress('action', subGoalIndex, actionIdx)}
                         activeOpacity={0.8}
@@ -342,15 +372,20 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   modalContainer: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 20,
+    backgroundColor: 'rgba(242, 242, 247, 0.95)',
+    borderRadius: 24,
     overflow: 'hidden',
-    borderWidth: 0,
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: 6 },
+    // Liquid glass border
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    borderRightColor: 'rgba(0, 0, 0, 0.08)',
+    // Outer shadow
+    shadowColor: 'rgba(0, 0, 0, 0.25)',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
-    shadowRadius: 20,
-    elevation: 16,
+    shadowRadius: 24,
+    elevation: 20,
   },
   glassHighlight: {
     display: 'none',
@@ -383,8 +418,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 99,
-    backgroundColor: 'rgba(187, 187, 188, 0.15)',
-    borderWidth: 0,
+    backgroundColor: 'rgba(240, 240, 242, 0.8)',
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.05)',
+    // Shadow
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   closeText: {
     fontSize: 16,
@@ -414,8 +459,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 99,
-    backgroundColor: '#34c759',
-    borderWidth: 0,
+    backgroundColor: 'rgba(52, 199, 89, 0.9)',
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.15)',
+    borderRightColor: 'rgba(0, 0, 0, 0.1)',
+    // Shadow
+    shadowColor: 'rgba(52, 199, 89, 0.4)',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 4,
   },
   completeAllButtonText: {
     fontSize: 12,
@@ -442,15 +497,22 @@ const styles = StyleSheet.create({
   centerCell: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 0,
-    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    // 반투명 배경 (blur 효과와 함께)
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     padding: 12,
     overflow: 'hidden',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
+    // Liquid glass outer shadow
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowRadius: 8,
+    elevation: 6,
+    // Subtle border for depth
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.7)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.05)',
   },
   centerCellText: {
     fontSize: 14,
@@ -464,22 +526,35 @@ const styles = StyleSheet.create({
   actionCell: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 0,
-    backgroundColor: 'rgba(187, 187, 188, 0.12)',
+    // 반투명 배경 (blur 효과와 함께)
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     padding: 10,
     position: 'relative',
     overflow: 'hidden',
-    shadowColor: 'rgba(0, 0, 0, 0.06)',
-    shadowOffset: { width: 0, height: 2 },
+    // Liquid glass outer shadow
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
+    // Subtle border for glass effect
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.7)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.06)',
   },
   actionCellCompleted: {
-    backgroundColor: 'rgba(187, 187, 188, 0.22)',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowRadius: 8,
-    elevation: 8,
+    // Inset 효과: 눌린 느낌의 반투명 배경
+    backgroundColor: 'rgba(180, 200, 230, 0.4)',
+    // 외부 shadow 제거
+    shadowOpacity: 0,
+    elevation: 0,
+    // Inset border: 위/왼쪽 어둡게, 아래/오른쪽 밝게
+    borderTopColor: 'rgba(0, 0, 0, 0.15)',
+    borderLeftColor: 'rgba(0, 0, 0, 0.1)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.8)',
+    borderRightColor: 'rgba(255, 255, 255, 0.7)',
   },
   actionNumber: {
     position: 'absolute',

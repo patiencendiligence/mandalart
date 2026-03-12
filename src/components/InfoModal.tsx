@@ -8,7 +8,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { MANDALART_COLORS } from '../utils/colors';
+
 
 interface InfoModalProps {
   visible: boolean;

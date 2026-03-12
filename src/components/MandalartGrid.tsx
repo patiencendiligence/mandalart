@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, useWindowDimensions, ImageBackground, Platform } from 'react-native';
 import { Cell } from './Cell';
 import { MandalartData } from '../types/mandalart';
-import { MANDALART_COLORS } from '../utils/colors';
+
 
 interface MandalartGridProps {
   data: MandalartData;
@@ -94,27 +94,11 @@ export function MandalartGrid({
   // 완료 시 개별 셀 크기 계산
   const completedCellSize = Math.floor((actualGridSize - GRID_PADDING * 2) / 3);
 
-  // 배경 이미지 렌더링 (blur 효과 적용)
-  const renderBackgroundImage = () => {
-    if (!backgroundImage) return null;
-    
-    return (
-      <>
-        <ImageBackground
-          source={{ uri: backgroundImage }}
-          style={styles.backgroundImage}
-          resizeMode="cover"
-        />
-        <View style={styles.backgroundBlur} />
-      </>
-    );
-  };
 
   // 전체 완료 시 융합된 뷰 렌더링
   if (allCompleted) {
     return (
-      <View style={[styles.container, backgroundImage && styles.transparentBg]}>
-        {renderBackgroundImage()}
+      <View style={[styles.container]}>
         <View style={[
           styles.glassBackground, 
           { width: actualGridSize + 40, height: actualGridSize + 40 }
@@ -181,7 +165,6 @@ export function MandalartGrid({
 
   return (
     <View style={[styles.container, backgroundImage && styles.transparentBg]}>
-      {renderBackgroundImage()}
       {/* Liquid Glass 배경 효과 */}
       <View style={[
         styles.glassBackground, 
@@ -241,7 +224,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: MANDALART_COLORS.common.background,
+    backgroundColor: "transparent",
     overflow: 'hidden',
   },
   transparentBg: {

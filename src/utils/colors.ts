@@ -60,51 +60,87 @@ export function getCompletedColor(baseColor: string) {
   return baseColor + '80';
 }
 
-// Liquid Glass 스타일 - Apple iOS 26 (테두리 없음, 그림자로 표현)
+// Liquid Glass 스타일 - Apple iOS 26 (입체감 있는 유리 효과 + blur)
 export const LIQUID_GLASS_STYLE = {
   cell: {
-    backgroundColor: 'rgba(187, 187, 188, 0.12)',
-    borderWidth: 0,
-    borderColor: 'transparent',
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 2 },
+    // 반투명 배경 (blur 효과와 함께)
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    // Liquid glass border: 위/왼쪽 밝게, 아래/오른쪽 어둡게
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.7)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.06)',
+    // Outer shadow
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 8,
     elevation: 4,
   },
   cellCompleted: {
-    backgroundColor: 'rgba(187, 187, 188, 0.25)',
-    borderColor: 'transparent',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
+    // Inset 효과: 눌린 느낌의 반투명 배경
+    backgroundColor: 'rgba(180, 200, 230, 0.4)',
+    // Inset border: 위/왼쪽 어둡게, 아래/오른쪽 밝게
+    borderWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.15)',
+    borderLeftColor: 'rgba(0, 0, 0, 0.12)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.9)',
+    borderRightColor: 'rgba(255, 255, 255, 0.8)',
+    // 외부 shadow 제거
+    shadowOpacity: 0,
+    elevation: 0,
   },
 };
 
 // Liquid Glass 컨테이너 스타일
 export const LIQUID_GLASS_CONTAINER = {
-  backgroundColor: 'rgba(187, 187, 188, 0.12)',
-  borderWidth: 0,
-  borderColor: 'transparent',
-  borderRadius: 20,
-  shadowColor: 'rgba(0, 0, 0, 0.1)',
-  shadowOffset: { width: 0, height: 4 },
+  backgroundColor: 'rgba(242, 242, 247, 0.95)',
+  borderRadius: 24,
+  // Liquid glass border
+  borderWidth: 1.5,
+  borderTopColor: 'rgba(255, 255, 255, 0.8)',
+  borderLeftColor: 'rgba(255, 255, 255, 0.7)',
+  borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  borderRightColor: 'rgba(0, 0, 0, 0.08)',
+  // Outer shadow
+  shadowColor: 'rgba(0, 0, 0, 0.2)',
+  shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 1,
-  shadowRadius: 16,
-  elevation: 8,
+  shadowRadius: 20,
+  elevation: 12,
 };
 
 // Liquid Glass 버튼 스타일
 export const LIQUID_GLASS_BUTTON = {
-  backgroundColor: 'rgba(187, 187, 188, 0.2)',
-  borderWidth: 0,
-  borderColor: 'transparent',
+  backgroundColor: 'rgba(240, 240, 242, 0.85)',
   borderRadius: 99,
-  shadowColor: 'rgba(0, 0, 0, 0.08)',
-  shadowOffset: { width: 0, height: 2 },
+  // Liquid glass border
+  borderWidth: 1,
+  borderTopColor: 'rgba(255, 255, 255, 0.6)',
+  borderLeftColor: 'rgba(255, 255, 255, 0.5)',
+  borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  borderRightColor: 'rgba(0, 0, 0, 0.06)',
+  // Outer shadow
+  shadowColor: 'rgba(0, 0, 0, 0.12)',
+  shadowOffset: { width: 0, height: 3 },
   shadowOpacity: 1,
   shadowRadius: 8,
-  elevation: 4,
+  elevation: 5,
+};
+
+// Liquid Glass 버튼 Active 상태 (눌린 느낌)
+export const LIQUID_GLASS_BUTTON_ACTIVE = {
+  backgroundColor: 'rgba(210, 220, 235, 0.6)',
+  borderRadius: 99,
+  // Inset border
+  borderWidth: 1,
+  borderTopColor: 'rgba(0, 0, 0, 0.12)',
+  borderLeftColor: 'rgba(0, 0, 0, 0.1)',
+  borderBottomColor: 'rgba(255, 255, 255, 0.8)',
+  borderRightColor: 'rgba(255, 255, 255, 0.7)',
+  // 외부 shadow 제거
+  shadowOpacity: 0,
+  elevation: 0,
 };
 

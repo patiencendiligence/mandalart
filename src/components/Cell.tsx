@@ -5,8 +5,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Platform,
 } from 'react-native';
-import { MANDALART_COLORS, LIQUID_GLASS_STYLE } from '../utils/colors';
+import { LIQUID_GLASS_STYLE } from '../utils/colors';
 
 interface CellProps {
   text: string;
@@ -53,25 +54,26 @@ export function Cell({
   // Merge 방향에 따른 borderRadius 조정
   const getMergedBorderRadius = () => {
     return {
-      borderTopLeftRadius: (mergeTop || mergeLeft) ? 2 : borderRadius,
-      borderTopRightRadius: (mergeTop || mergeRight) ? 2 : borderRadius,
-      borderBottomLeftRadius: (mergeBottom || mergeLeft) ? 2 : borderRadius,
-      borderBottomRightRadius: (mergeBottom || mergeRight) ? 2 : borderRadius,
+      borderTopLeftRadius: (mergeTop || mergeLeft) ? 0 : borderRadius,
+      borderTopRightRadius: (mergeTop || mergeRight) ? 0 : borderRadius,
+      borderBottomLeftRadius: (mergeBottom || mergeLeft) ? 0 : borderRadius,
+      borderBottomRightRadius: (mergeBottom || mergeRight) ? 0 : borderRadius,
     };
   };
 
-  // Merge 방향에 따른 border 숨김
-  const getMergedBorders = () => {
+  // Merge 방향에 따른 border 숨김 (완료된 셀 연결 시)
+  const getMergedBorderWidths = () => {
+    if (!completed) return {};
     return {
-      borderTopWidth: 0,
-      borderBottomWidth: 0,
-      borderLeftWidth: 0,
-      borderRightWidth: 0,
+      borderTopWidth: mergeTop ? 0 : 1,
+      borderBottomWidth: mergeBottom ? 0 : 1,
+      borderLeftWidth: mergeLeft ? 0 : 1,
+      borderRightWidth: mergeRight ? 0 : 1,
     };
   };
 
   const mergedRadius = completed ? getMergedBorderRadius() : { borderRadius };
-  const mergedBorders = { borderWidth: 0 };
+  const mergedBorderWidths = getMergedBorderWidths();
   
   // 기본 마진 및 완료된 셀 연결 시 마진 조정
   const baseMargin = 3; // 기본 마진 (CELL_GAP/2)
@@ -89,26 +91,51 @@ export function Cell({
     };
   };
   
+  // 연결 방향으로 크기 확장하여 정렬 유지
+  const getMergedSize = () => {
+    if (!completed) return { width: cellSize, height: cellSize };
+    const extraWidth = (mergeLeft ? baseMargin : 0) + (mergeRight ? baseMargin : 0);
+    const extraHeight = (mergeTop ? baseMargin : 0) + (mergeBottom ? baseMargin : 0);
+    return {
+      width: cellSize + extraWidth,
+      height: cellSize + extraHeight,
+    };
+  };
+  
   const mergedMargins = getMergedMargins();
+  const mergedSize = getMergedSize();
+
+  // 웹에서 backdrop blur 효과
+  const webBlurStyle = Platform.select({
+    web: {
+      backdropFilter: 'blur(6px)',
+      WebkitBackdropFilter: 'blur(6px)',
+    },
+    default: {},
+  });
 
   const dynamicStyles = {
     cell: {
-      width: cellSize,
-      height: cellSize,
+      ...mergedSize,
       backgroundColor: glassStyle.backgroundColor,
-      borderWidth: 0,
+      // Liquid glass border
+      borderWidth: glassStyle.borderWidth,
+      borderTopColor: glassStyle.borderTopColor,
+      borderLeftColor: glassStyle.borderLeftColor,
+      borderBottomColor: glassStyle.borderBottomColor,
+      borderRightColor: glassStyle.borderRightColor,
       ...mergedRadius,
+      ...mergedBorderWidths,
       ...mergedMargins,
-      shadowColor: glassStyle.shadowColor,
-      shadowOffset: glassStyle.shadowOffset,
-      shadowOpacity: glassStyle.shadowOpacity,
-      shadowRadius: glassStyle.shadowRadius,
-      elevation: completed ? 5 : 4,
+
+      elevation: completed ? 0 : 4,
+      // Backdrop blur (web)
+      ...webBlurStyle,
     },
     text: {
       color: '#333',
       fontSize,
-      opacity: completed ? 0.6 : 1,
+      opacity: completed ? 0.7 : 1,
     },
   };
 
@@ -154,12 +181,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 6,
+    overflow: 'hidden',
   },
   
   centerCell: {},
   
   mainCell: {
-    backgroundColor: 'rgba(187, 187, 188, 0.18)',
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
   },
 
   text: {

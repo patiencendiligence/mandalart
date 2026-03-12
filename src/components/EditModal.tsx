@@ -105,6 +105,7 @@ export function EditModal({
     ) {
       setIsCompleted(!isCompleted);
       onToggleComplete(selectedCell.subGoalIndex, selectedCell.actionIndex);
+      onClose();
     }
   };
 
@@ -152,22 +153,31 @@ export function EditModal({
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.overlay}
       >
-        <TouchableOpacity style={styles.backdrop} onPress={onClose} activeOpacity={1} />
-        
+        <TouchableOpacity
+          style={styles.backdrop}
+          onPress={onClose}
+          activeOpacity={1}
+        />
+
         <Animated.View
           style={[
             styles.modalContainer,
             { transform: [{ translateY: slideAnim }] },
-            selectedCell?.type === 'subGoal' && data?.subGoals[selectedCell.subGoalIndex ?? 0]?.actions?.every(a => a.completed) ? styles.blob : null,
+            selectedCell?.type === "subGoal" &&
+            data?.subGoals[selectedCell.subGoalIndex ?? 0]?.actions?.every(
+              (a) => a.completed,
+            )
+              ? styles.blob
+              : null,
           ]}
         >
           <View style={[styles.header, { backgroundColor: colors.bg }]}>
             <Text style={styles.title}>{getTitle()}</Text>
-            <TouchableOpacity 
-              onPress={onClose} 
+            <TouchableOpacity
+              onPress={onClose}
               style={styles.closeButton}
               accessibilityRole="button"
               accessibilityLabel="닫기"
@@ -183,6 +193,11 @@ export function EditModal({
               value={text}
               onChangeText={setText}
               placeholder={getPlaceholder()}
+              onKeyPress={(event) => {
+                if (event.nativeEvent.key === "Enter") {
+                  handleSave();
+                }
+              }}
               placeholderTextColor={MANDALART_COLORS.common.textMuted}
               multiline
               maxLength={100}
@@ -190,29 +205,38 @@ export function EditModal({
               blurOnSubmit
             />
 
-
             {/* Hide save button if all actions are completed for subGoal */}
             {(() => {
-              if (selectedCell?.type === 'subGoal' && data && typeof selectedCell.subGoalIndex === 'number') {
+              if (
+                selectedCell?.type === "subGoal" &&
+                data &&
+                typeof selectedCell.subGoalIndex === "number"
+              ) {
                 const subGoal = data.subGoals[selectedCell.subGoalIndex];
-                if (subGoal && Array.isArray(subGoal.actions) && subGoal.actions.length > 0 && subGoal.actions.every(a => a.completed)) {
+                if (
+                  subGoal &&
+                  Array.isArray(subGoal.actions) &&
+                  subGoal.actions.length > 0 &&
+                  subGoal.actions.every((a) => a.completed)
+                ) {
                   return null;
                 }
               }
-              // {selectedCell?.type === 'action' && (() => {
-              // if (
-              //   text.trim().length === 0 ||
-              //   !(selectedCell && data && typeof selectedCell.subGoalIndex === 'number' && typeof selectedCell.actionIndex === 'number')
-              // ) {
-              //   return null;
-              // }
-              const saved = (selectedCell?.subGoalIndex != null && selectedCell?.actionIndex != null)
-  ? data?.subGoals[selectedCell.subGoalIndex]?.actions[selectedCell.actionIndex]?.text ?? ''
-  : '';
+
+              const saved =
+                selectedCell?.subGoalIndex != null &&
+                selectedCell?.actionIndex != null
+                  ? (data?.subGoals[selectedCell.subGoalIndex]?.actions[
+                      selectedCell.actionIndex
+                    ]?.text ?? "")
+                  : "";
               if (text !== saved || !saved) {
                 return (
                   <TouchableOpacity
-                    style={[styles.saveButton, { backgroundColor: 'rgba(217, 217, 217, 0.2)'}]}
+                    style={[
+                      styles.saveButton,
+                      { backgroundColor: "rgba(217, 217, 217, 0.2)" },
+                    ]}
                     onPress={handleSave}
                     accessibilityRole="button"
                     accessibilityLabel="저장"
@@ -222,16 +246,30 @@ export function EditModal({
                 );
               } else {
                 // 실행계획(action)인 경우에만 완료/완료취소 버튼 표시
-                const isActionType = selectedCell?.type === 'action';
-                const completeButtonText = isCompleted ? '완료취소' : '실행완료';
-                const completeButtonBg = isCompleted 
-                  ? 'rgba(231, 76, 60, 0.6)'  // 빨간색 계열 (완료취소)
-                  : 'rgba(39, 174, 96, 0.6)'; // 초록색 계열 (실행완료)
-                
+                const isActionType = selectedCell?.type === "action";
+                const completeButtonText = isCompleted
+                  ? "완료취소"
+                  : "실행완료";
+                const completeButtonBg = isCompleted
+                  ? "rgba(231, 76, 60, 0.6)" // 빨간색 계열 (완료취소)
+                  : "rgba(39, 174, 96, 0.6)"; // 초록색 계열 (실행완료)
+
                 return (
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginTop: 8,
+                    }}
+                  >
                     <TouchableOpacity
-                      style={[styles.saveButton, { backgroundColor: 'rgba(172, 172, 172, 0.69)', width: isActionType ? '48%' : '100%'}]}
+                      style={[
+                        styles.saveButton,
+                        {
+                          backgroundColor: "rgba(172, 172, 172, 0.69)",
+                          width: isActionType ? "48%" : "100%",
+                        },
+                      ]}
                       onPress={handleSave}
                       accessibilityRole="button"
                       accessibilityLabel="수정"
@@ -240,20 +278,23 @@ export function EditModal({
                     </TouchableOpacity>
                     {isActionType && (
                       <TouchableOpacity
-                        style={[styles.saveButton, { backgroundColor: completeButtonBg, width: '48%'}]}
+                        style={[
+                          styles.saveButton,
+                          { backgroundColor: completeButtonBg, width: "48%" },
+                        ]}
                         onPress={handleComplete}
                         accessibilityRole="button"
                         accessibilityLabel={completeButtonText}
                       >
-                        <Text style={styles.saveButtonText}>{completeButtonText}</Text>
+                        <Text style={styles.saveButtonText}>
+                          {completeButtonText}
+                        </Text>
                       </TouchableOpacity>
                     )}
                   </View>
                 );
               }
-
             })()}
-              
           </View>
         </Animated.View>
       </KeyboardAvoidingView>
@@ -283,17 +324,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   modalContainer: {
-    backgroundColor: '#f5f5f5',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: 'rgba(242, 242, 247, 0.95)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     minHeight: 300,
     overflow: 'hidden',
-    borderWidth: 0,
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: -4 },
+    // Liquid glass border
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    borderRightColor: 'rgba(0, 0, 0, 0.08)',
+    // Outer shadow
+    shadowColor: 'rgba(0, 0, 0, 0.25)',
+    shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 16,
+    shadowRadius: 20,
+    elevation: 20,
   },
   header: {
     flexDirection: 'row',
@@ -316,8 +362,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 99,
-    backgroundColor: 'rgba(187, 187, 188, 0.15)',
-    borderWidth: 0,
+    backgroundColor: 'rgba(240, 240, 242, 0.8)',
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.05)',
+    // Shadow
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   closeText: {
     fontSize: 16,
@@ -327,15 +383,25 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   input: {
-    backgroundColor: 'rgba(187, 187, 188, 0.1)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(240, 240, 242, 0.8)',
+    borderRadius: 16,
     padding: 16,
     fontSize: 16,
     color: '#333',
     minHeight: 100,
     textAlignVertical: 'top',
     marginBottom: 16,
-    borderWidth: 0,
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.05)',
+    // Shadow
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 2,
   },
   toggleRow: {
     flexDirection: 'row',
@@ -354,8 +420,18 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
-    backgroundColor: 'rgba(187, 187, 188, 0.15)',
-    borderWidth: 0,
+    backgroundColor: 'rgba(240, 240, 242, 0.8)',
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.05)',
+    // Shadow
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 4,
   },
   saveButtonText: {
     color: '#333',

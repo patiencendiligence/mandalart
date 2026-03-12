@@ -285,12 +285,32 @@ export function HomeScreen() {
             <Text style={styles.loadingText}>불러오는 중...</Text>
           </View>
         ) : !shouldShowOnboarding && data ? (
-          <MandalartGrid
-            data={data}
-            onCellPress={handleCellPress}
-            onSubGoalGridPress={handleSubGoalGridPress}
-            backgroundImage={backgroundImage}
-          />
+          <ImageBackground
+            source={backgroundImage ? { uri: backgroundImage } : undefined}
+            style={styles.backgroundContainer}
+            resizeMode="cover"
+          >
+            <MandalartGrid
+              data={data}
+              onCellPress={handleCellPress}
+              onSubGoalGridPress={handleSubGoalGridPress}
+            />
+            {/* 이미지 다운로드 버튼 (완료 시에만 표시) */}
+            {isAllCompleted && data?.reflection && (
+              <View style={styles.downloadButtonContainer}>
+                <TouchableOpacity
+                  style={styles.downloadButton}
+                  onPress={handleDownloadImage}
+                  accessibilityRole="button"
+                  accessibilityLabel="이미지로 다운로드하기"
+                >
+                  <Text style={styles.downloadButtonText}>
+                    📥 이미지로 다운로드하기
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </ImageBackground>
         ) : !shouldShowOnboarding ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>데이터를 불러올 수 없습니다</Text>
@@ -361,21 +381,6 @@ export function HomeScreen() {
           expiringData={expiringData}
           onClose={handleCloseExpiryWarning}
         />
-        {/* 이미지 다운로드 버튼 (완료 시에만 표시) */}
-        {isAllCompleted && data?.reflection && (
-          <View style={styles.downloadButtonContainer}>
-            <TouchableOpacity
-              style={styles.downloadButton}
-              onPress={handleDownloadImage}
-              accessibilityRole="button"
-              accessibilityLabel="이미지로 다운로드하기"
-            >
-              <Text style={styles.downloadButtonText}>
-                📥 이미지로 다운로드하기
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </SafeAreaView>
     </>
   );
@@ -425,6 +430,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: MANDALART_COLORS.common.textSecondary,
   },
+  backgroundContainer: {
+    flex: 1,
+  },
   emptyContainer: {
     flex: 1,
   },
@@ -443,16 +451,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   downloadButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#007aff',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    backgroundColor: 'rgba(240, 240, 242, 0.85)',
     borderRadius: 99,
-    borderWidth: 0,
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    borderRightColor: 'rgba(0, 0, 0, 0.06)',
+    // Outer shadow
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 6,
   },
   downloadButtonText: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#ffffff',
+    fontWeight: '600',
+    color: '#333',
   },
 });
 
