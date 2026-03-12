@@ -91,45 +91,57 @@ export function MiniGrid({
   const actionPositions = [0, 1, 2, 3, -1, 4, 5, 6, 7]; // -1은 중앙(세부목표)
 
   return (
-    <TouchableOpacity
+    <View
       style={[
         styles.grid,
+        styles.subGoalGrid,
         { backgroundColor: colors.bg + '30', width: gridSize, height: gridSize },
         isGridComplete && styles.blob,
       ]}
-      onPress={onGridPress}
-      activeOpacity={0.8}
+      accessibilityRole="list"
+      accessibilityLabel={`세부목표 ${subGoalIndex + 1}: ${subGoal.text || '미입력'}`}
     >
-      {actionPositions.map((actionIdx, idx) => {
-        if (actionIdx === -1) {
+      {onGridPress && (
+        <TouchableOpacity
+          style={styles.gridPressOverlay}
+          onPress={onGridPress}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={`세부목표 ${subGoalIndex + 1} 상세보기`}
+        />
+      )}
+      <View style={styles.cellsContainer}>
+        {actionPositions.map((actionIdx, idx) => {
+          if (actionIdx === -1) {
+            return (
+              <Cell
+                key={`center-${subGoalIndex}`}
+                text={subGoal.text}
+                type="subGoal"
+                subGoalIndex={subGoalIndex}
+                isCenter
+                onPress={() => onCellPress?.('subGoal', subGoalIndex)}
+                cellSize={cellSize}
+                noBorder={!!isGridComplete}
+              />
+            );
+          }
+          const action = subGoal.actions[actionIdx];
           return (
             <Cell
-              key={`center-${subGoalIndex}`}
-              text={subGoal.text}
-              type="subGoal"
+              key={`action-${subGoalIndex}-${actionIdx}`}
+              text={action?.text || ''}
+              type="action"
               subGoalIndex={subGoalIndex}
-              isCenter
-              onPress={() => onCellPress?.('subGoal', subGoalIndex)}
+              completed={action?.completed}
+              onPress={() => onCellPress?.('action', subGoalIndex, actionIdx)}
               cellSize={cellSize}
               noBorder={!!isGridComplete}
             />
           );
-        }
-        const action = subGoal.actions[actionIdx];
-        return (
-          <Cell
-            key={`action-${subGoalIndex}-${actionIdx}`}
-            text={action?.text || ''}
-            type="action"
-            subGoalIndex={subGoalIndex}
-            completed={action?.completed}
-            onPress={() => onCellPress?.('action', subGoalIndex, actionIdx)}
-            cellSize={cellSize}
-            noBorder={!!isGridComplete}
-          />
-        );
-      })}
-    </TouchableOpacity>
+        })}
+      </View>
+    </View>
   );
 }
 
@@ -142,6 +154,27 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 0,
     aspectRatio: 1,
+  },
+  subGoalGrid: {
+    position: 'relative',
+  },
+  gridPressOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  cellsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+    zIndex: 1,
   },
   mainGrid: {
     backgroundColor: MANDALART_COLORS.common.surface,
@@ -157,6 +190,5 @@ const styles = StyleSheet.create({
     elevation: 8,
     backgroundColor: 'transparent',
   }
-
 });
 

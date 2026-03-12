@@ -16,6 +16,7 @@ interface PeriodSelectorProps {
   onYearChange: (year: number) => void;
   onMonthChange: (month: number) => void;
   onInfoPress?: () => void;
+  onSettingsPress?: () => void;
 }
 
 const MONTHS = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
@@ -28,6 +29,7 @@ export function PeriodSelector({
   onYearChange,
   onMonthChange,
   onInfoPress,
+  onSettingsPress,
 }: PeriodSelectorProps) {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
@@ -55,11 +57,18 @@ export function PeriodSelector({
           </TouchableOpacity>
         </View>
         
-        {onInfoPress && (
-          <TouchableOpacity style={styles.infoButton} onPress={onInfoPress}>
-            <Text style={styles.infoButtonText}>?</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.headerButtons}>
+          {onSettingsPress && (
+            <TouchableOpacity style={styles.infoButton} onPress={onSettingsPress}>
+              <Text style={styles.infoButtonText}>⚙</Text>
+            </TouchableOpacity>
+          )}
+          {onInfoPress && (
+            <TouchableOpacity style={styles.infoButton} onPress={onInfoPress}>
+              <Text style={styles.infoButtonText}>?</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* 연도 선택 */}
@@ -109,10 +118,8 @@ export function PeriodSelector({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: MANDALART_COLORS.common.surface,
+    backgroundColor: 'transparent',
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: MANDALART_COLORS.common.border,
   },
   headerRow: {
     flexDirection: 'row',
@@ -121,40 +128,62 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
   },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   periodToggle: {
     flexDirection: 'row',
-    backgroundColor: MANDALART_COLORS.common.surfaceLight,
-    borderRadius: 20,
+    backgroundColor: 'rgba(187, 187, 188, 0.12)',
+    borderRadius: 99,
     padding: 4,
+    borderWidth: 0,
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   toggleButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 99,
   },
   toggleButtonActive: {
-    backgroundColor: MANDALART_COLORS.main.bg,
+    backgroundColor: 'rgba(187, 187, 188, 0.25)',
+    borderRadius: 99,
+    shadowColor: 'rgba(0, 0, 0, 0.06)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   toggleText: {
     fontSize: 14,
     fontWeight: '600',
-    color: MANDALART_COLORS.common.textMuted,
+    color: '#8a9aaa',
   },
   toggleTextActive: {
-    color: MANDALART_COLORS.common.text,
+    color: '#2a3a4a',
   },
   infoButton: {
     width: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: MANDALART_COLORS.common.surfaceLight,
+    borderRadius: 99,
+    backgroundColor: 'rgba(187, 187, 188, 0.12)',
+    borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   infoButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: MANDALART_COLORS.main.text,
+    color: '#5a6a7a',
   },
   yearScroll: {
     marginBottom: 8,
@@ -164,21 +193,34 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   yearButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 12,
-    marginRight: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 99,
+    marginRight: 6,
+    backgroundColor: 'rgba(187, 187, 188, 0.08)',
+    borderWidth: 0,
+    shadowColor: 'rgba(0, 0, 0, 0.04)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   yearButtonActive: {
-    backgroundColor: MANDALART_COLORS.common.surfaceLight,
+    backgroundColor: 'rgba(187, 187, 188, 0.2)',
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 3,
   },
   yearText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: MANDALART_COLORS.common.textMuted,
+    fontWeight: '600',
+    color: '#8a9aaa',
   },
   yearTextActive: {
-    color: MANDALART_COLORS.common.text,
+    color: '#2a3a4a',
+    fontWeight: '700',
   },
   monthScroll: {
     marginTop: 4,
@@ -188,21 +230,34 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   monthButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 10,
-    marginRight: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 99,
+    marginRight: 5,
+    backgroundColor: 'rgba(187, 187, 188, 0.06)',
+    borderWidth: 0,
+    shadowColor: 'rgba(0, 0, 0, 0.03)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    elevation: 1,
   },
   monthButtonActive: {
-    backgroundColor: MANDALART_COLORS.subGoals[0].bg,
+    backgroundColor: 'rgba(187, 187, 188, 0.2)',
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 3,
   },
   monthText: {
     fontSize: 13,
-    fontWeight: '500',
-    color: MANDALART_COLORS.common.textMuted,
+    fontWeight: '600',
+    color: '#8a9aaa',
   },
   monthTextActive: {
-    color: MANDALART_COLORS.subGoals[0].text,
+    color: '#2a3a4a',
+    fontWeight: '700',
   },
 });
 

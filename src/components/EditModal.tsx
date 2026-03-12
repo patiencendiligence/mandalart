@@ -165,8 +165,13 @@ export function EditModal({
           ]}
         >
           <View style={[styles.header, { backgroundColor: colors.bg }]}>
-            <Text style={[styles.title, { color: colors.text }]}>{getTitle()}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.title}>{getTitle()}</Text>
+            <TouchableOpacity 
+              onPress={onClose} 
+              style={styles.closeButton}
+              accessibilityRole="button"
+              accessibilityLabel="닫기"
+            >
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -209,25 +214,40 @@ export function EditModal({
                   <TouchableOpacity
                     style={[styles.saveButton, { backgroundColor: 'rgba(217, 217, 217, 0.2)'}]}
                     onPress={handleSave}
+                    accessibilityRole="button"
+                    accessibilityLabel="저장"
                   >
                     <Text style={styles.saveButtonText}>저장</Text>
                   </TouchableOpacity>
                 );
               } else {
+                // 실행계획(action)인 경우에만 완료/완료취소 버튼 표시
+                const isActionType = selectedCell?.type === 'action';
+                const completeButtonText = isCompleted ? '완료취소' : '실행완료';
+                const completeButtonBg = isCompleted 
+                  ? 'rgba(231, 76, 60, 0.6)'  // 빨간색 계열 (완료취소)
+                  : 'rgba(39, 174, 96, 0.6)'; // 초록색 계열 (실행완료)
+                
                 return (
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
                     <TouchableOpacity
-                      style={[styles.saveButton, { backgroundColor: 'rgba(172, 172, 172, 0.69)', width: '48%'}]}
+                      style={[styles.saveButton, { backgroundColor: 'rgba(172, 172, 172, 0.69)', width: isActionType ? '48%' : '100%'}]}
                       onPress={handleSave}
+                      accessibilityRole="button"
+                      accessibilityLabel="수정"
                     >
                       <Text style={styles.saveButtonText}>수정</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.saveButton, { backgroundColor: 'rgba(40, 31, 31, 0.59)', width: '48%'}]}
-                      onPress={handleComplete}
-                    >
-                      <Text style={styles.saveButtonText}>완료</Text>
-                    </TouchableOpacity>
+                    {isActionType && (
+                      <TouchableOpacity
+                        style={[styles.saveButton, { backgroundColor: completeButtonBg, width: '48%'}]}
+                        onPress={handleComplete}
+                        accessibilityRole="button"
+                        accessibilityLabel={completeButtonText}
+                      >
+                        <Text style={styles.saveButtonText}>{completeButtonText}</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 );
               }
@@ -242,102 +262,104 @@ export function EditModal({
 }
 
 const styles = StyleSheet.create({
-    blob: {
-      borderRadius: 32,
-      shadowColor: '#c9c9c9',
-      shadowOffset: { width: 10, height: 10 },
-      shadowOpacity: 0.3,
-      shadowRadius: 10,
-      elevation: 8,
-      backgroundColor: 'rgba(255,255,255,0.22)',
-      borderWidth: 2,
-      borderColor: '#e0e0e0',
-    },
+  blob: {
+    borderRadius: 20,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 8,
+    backgroundColor: 'rgba(187, 187, 188, 0.12)',
+    borderWidth: 0,
+  },
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
+    zIndex: 9999,
+    elevation: 9999,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   modalContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: '#f5f5f5',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     minHeight: 300,
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.35)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 24,
-    elevation: 8,
-    // iOS only: backdrop blur
-    // Android: fallback to backgroundColor
+    borderWidth: 0,
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 16,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderBottomWidth: 0
+    paddingHorizontal: 24,
+    paddingVertical: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
+    color: '#2a3a4a',
   },
   closeButton: {
     width: 32,
     height: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 99,
+    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    borderWidth: 0,
   },
   closeText: {
     fontSize: 16,
-    color: '#ffffff',
+    color: '#666',
   },
   content: {
     padding: 20,
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(187, 187, 188, 0.1)',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: MANDALART_COLORS.common.text,
+    color: '#333',
     minHeight: 100,
     textAlignVertical: 'top',
     marginBottom: 16,
+    borderWidth: 0,
   },
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    marginBottom: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    marginBottom: 18,
   },
   toggleLabel: {
     fontSize: 16,
-    color: MANDALART_COLORS.common.text,
+    color: '#2a3a4a',
   },
   saveButton: {
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: 99,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
+    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    borderWidth: 0,
   },
   saveButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '700',
+    color: '#333',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

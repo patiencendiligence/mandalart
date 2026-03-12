@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,9 @@ import {
   SafeAreaView,
   StatusBar,
   ActivityIndicator,
+  TouchableOpacity,
+  ImageBackground,
+  Platform,
 } from 'react-native';
 import { MandalartGrid } from '../components/MandalartGrid';
 import { EditModal } from '../components/EditModal';
@@ -13,9 +16,21 @@ import { DetailModal } from '../components/DetailModal';
 import { InfoModal } from '../components/InfoModal';
 import { OnboardingModal } from '../components/OnboardingModal';
 import { PeriodSelector } from '../components/PeriodSelector';
+import { CelebrationModal } from '../components/CelebrationModal';
+import { MandalartImageExport } from '../components/MandalartImageExport';
+import { SettingsModal } from '../components/SettingsModal';
+import { ExpiryWarningModal } from '../components/ExpiryWarningModal';
 import { useMandalart } from '../hooks/useMandalart';
-import { SelectedCell } from '../types/mandalart';
+import { SelectedCell, Reflection, MandalartData } from '../types/mandalart';
 import { MANDALART_COLORS } from '../utils/colors';
+import {
+  getExpiringMandalarts,
+  deleteExpiredMandalarts,
+  shouldShowExpiryWarning,
+  markWarningShown,
+} from '../storage/mandalartStorage';
+
+const BACKGROUND_IMAGE_KEY = 'mandalart_background_image';
 
 export function HomeScreen() {
   // 기간 상태
@@ -32,6 +47,8 @@ export function HomeScreen() {
     updateSubGoal,
     updateAction,
     toggleActionComplete,
+    completeAllActions,
+    saveReflection,
   } = useMandalart(period, year, period === 'monthly' ? month : undefined);
 
   // 모달 상태
@@ -39,8 +56,85 @@ export function HomeScreen() {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [onboardingVisible, setOnboardingVisible] = useState(false);
+  const [celebrationModalVisible, setCelebrationModalVisible] = useState(false);
+  const [exportModalVisible, setExportModalVisible] = useState(false);
+  const [settingsModalVisible, setSettingsModalVisible] = useState(false);
   const [selectedCell, setSelectedCell] = useState<SelectedCell>();
   const [selectedSubGoalIndex, setSelectedSubGoalIndex] = useState<number>(0);
+
+  // 배경 이미지 상태
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+
+  // 만료 경고 모달 상태
+  const [expiryWarningVisible, setExpiryWarningVisible] = useState(false);
+  const [expiringData, setExpiringData] = useState<MandalartData[]>([]);
+
+  // 배경 이미지 로드/저장
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const saved = localStorage.getItem(BACKGROUND_IMAGE_KEY);
+      if (saved) {
+        setBackgroundImage(saved);
+      }
+    }
+  }, []);
+
+  // 앱 시작 시 만료 데이터 체크 및 처리
+  useEffect(() => {
+    const checkDataExpiry = async () => {
+      // 1. 만료된 데이터 자동 삭제 (2년 경과)
+      const deletedCount = await deleteExpiredMandalarts();
+      if (deletedCount > 0) {
+        console.log(`${deletedCount}개의 만료된 데이터가 자동 삭제되었습니다.`);
+      }
+
+      // 2. 만료 예정 데이터 경고 표시 (1개월 전)
+      const shouldShow = await shouldShowExpiryWarning();
+      if (shouldShow) {
+        const expiring = await getExpiringMandalarts();
+        if (expiring.length > 0) {
+          setExpiringData(expiring);
+          setExpiryWarningVisible(true);
+        }
+      }
+    };
+
+    checkDataExpiry();
+  }, []);
+
+  // 만료 경고 모달 닫기
+  const handleCloseExpiryWarning = useCallback(async () => {
+    setExpiryWarningVisible(false);
+    await markWarningShown();
+  }, []);
+
+  const handleBackgroundImageChange = useCallback((imageUri: string | null) => {
+    setBackgroundImage(imageUri);
+    if (Platform.OS === 'web') {
+      if (imageUri) {
+        localStorage.setItem(BACKGROUND_IMAGE_KEY, imageUri);
+      } else {
+        localStorage.removeItem(BACKGROUND_IMAGE_KEY);
+      }
+    }
+  }, []);
+  
+  // 완료 상태 추적 (축하 모달 중복 표시 방지)
+  const prevAllCompletedRef = useRef(false);
+  
+  // 모든 세부목표 완료 여부 확인
+  const isAllCompleted = data?.subGoals.every(subGoal => {
+    const hasActions = subGoal.actions.some(a => a.text?.trim());
+    return hasActions && subGoal.actions.every(a => a.completed);
+  }) ?? false;
+  
+  // 완료 상태 변경 감지 및 축하 모달 표시
+  useEffect(() => {
+    if (isAllCompleted && !prevAllCompletedRef.current && !data?.reflection) {
+      setCelebrationModalVisible(true);
+    }
+    prevAllCompletedRef.current = isAllCompleted;
+  }, [isAllCompleted, data?.reflection]);
 
   // 셀 클릭 핸들러
   const handleCellPress = useCallback((
@@ -58,11 +152,19 @@ export function HomeScreen() {
     setDetailModalVisible(true);
   }, []);
 
+  // EditModal이 DetailModal에서 열렸는지 추적
+  const [openedFromDetail, setOpenedFromDetail] = useState(false);
+
   // 모달 닫기
   const handleCloseEditModal = useCallback(() => {
     setEditModalVisible(false);
     setSelectedCell(undefined);
-  }, []);
+    // DetailModal에서 열렸으면 다시 DetailModal 표시
+    if (openedFromDetail) {
+      setDetailModalVisible(true);
+      setOpenedFromDetail(false);
+    }
+  }, [openedFromDetail]);
 
   const handleCloseDetailModal = useCallback(() => {
     setDetailModalVisible(false);
@@ -75,6 +177,8 @@ export function HomeScreen() {
     actionIndex?: number
   ) => {
     setSelectedCell({ type, subGoalIndex, actionIndex });
+    setDetailModalVisible(false); // DetailModal 먼저 닫기
+    setOpenedFromDetail(true);
     setEditModalVisible(true);
   }, []);
 
@@ -102,6 +206,21 @@ export function HomeScreen() {
     await toggleActionComplete(subGoalIndex, actionIndex);
   }, [toggleActionComplete]);
 
+  const handleCompleteAllActions = useCallback(async (subGoalIndex: number) => {
+    await completeAllActions(subGoalIndex);
+  }, [completeAllActions]);
+
+  // 회고 저장 핸들러
+  const handleSaveReflection = useCallback(async (reflection: Reflection) => {
+    await saveReflection(reflection);
+    setCelebrationModalVisible(false);
+  }, [saveReflection]);
+
+  // 이미지 다운로드 핸들러
+  const handleDownloadImage = useCallback(() => {
+    setExportModalVisible(true);
+  }, []);
+
   // 목표 없을 때 온보딩 체크
   const hasMainGoal = data?.mainGoal && data.mainGoal.trim().length > 0;
   const shouldShowOnboarding = !loading && !hasMainGoal && !!onboardingVisible;
@@ -121,16 +240,24 @@ export function HomeScreen() {
         onClose={() => setOnboardingVisible(false)}
       />
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor={MANDALART_COLORS.common.background} />
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={MANDALART_COLORS.common.background}
+        />
 
         {/* 헤더 */}
         <View style={styles.header}>
           <Text style={styles.headerSubtitle}>
-            {period === 'yearly' ? `${year}년 목표` : `${year}년 ${month}월 목표`}
+            {period === "yearly"
+              ? `${year}년 목표`
+              : `${year}년 ${month}월 목표`}
           </Text>
           {saving && (
             <View style={styles.savingIndicator}>
-              <ActivityIndicator size="small" color={MANDALART_COLORS.common.success} />
+              <ActivityIndicator
+                size="small"
+                color={MANDALART_COLORS.common.success}
+              />
               <Text style={styles.savingText}>저장 중...</Text>
             </View>
           )}
@@ -145,12 +272,16 @@ export function HomeScreen() {
           onYearChange={setYear}
           onMonthChange={setMonth}
           onInfoPress={() => setInfoModalVisible(true)}
+          onSettingsPress={() => setSettingsModalVisible(true)}
         />
 
         {/* 메인 그리드 */}
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={MANDALART_COLORS.common.text} />
+            <ActivityIndicator
+              size="large"
+              color={MANDALART_COLORS.common.text}
+            />
             <Text style={styles.loadingText}>불러오는 중...</Text>
           </View>
         ) : !shouldShowOnboarding && data ? (
@@ -158,6 +289,7 @@ export function HomeScreen() {
             data={data}
             onCellPress={handleCellPress}
             onSubGoalGridPress={handleSubGoalGridPress}
+            backgroundImage={backgroundImage}
           />
         ) : !shouldShowOnboarding ? (
           <View style={styles.errorContainer}>
@@ -167,7 +299,23 @@ export function HomeScreen() {
           <View style={styles.emptyContainer} />
         )}
 
-        {/* 편집 모달 */}
+        {/* 상세 모달 (줌인 뷰) */}
+        <DetailModal
+          visible={detailModalVisible}
+          subGoal={data?.subGoals[selectedSubGoalIndex] ?? null}
+          subGoalIndex={selectedSubGoalIndex}
+          onClose={handleCloseDetailModal}
+          onCellPress={handleDetailCellPress}
+          onCompleteAll={handleCompleteAllActions}
+        />
+
+        {/* 정보 모달 */}
+        <InfoModal
+          visible={infoModalVisible}
+          onClose={() => setInfoModalVisible(false)}
+        />
+
+        {/* 편집 모달 - 가장 마지막에 렌더링하여 최상위에 표시 */}
         <EditModal
           visible={editModalVisible}
           selectedCell={selectedCell}
@@ -179,20 +327,55 @@ export function HomeScreen() {
           onToggleComplete={handleToggleComplete}
         />
 
-        {/* 상세 모달 (줌인 뷰) */}
-        <DetailModal
-          visible={detailModalVisible}
-          subGoal={data?.subGoals[selectedSubGoalIndex] ?? null}
-          subGoalIndex={selectedSubGoalIndex}
-          onClose={handleCloseDetailModal}
-          onCellPress={handleDetailCellPress}
+        {/* 축하 모달 - 모든 목표 완료 시 */}
+        <CelebrationModal
+          visible={celebrationModalVisible}
+          year={year}
+          month={month}
+          onSave={handleSaveReflection}
         />
 
-        {/* 정보 모달 */}
-        <InfoModal
-          visible={infoModalVisible}
-          onClose={() => setInfoModalVisible(false)}
+        {/* 이미지 내보내기 모달 */}
+        {exportModalVisible && data && (
+          <MandalartImageExport
+            data={data}
+            onClose={() => setExportModalVisible(false)}
+            backgroundImage={backgroundImage}
+          />
+        )}
+
+        {/* 설정 모달 */}
+        <SettingsModal
+          visible={settingsModalVisible}
+          onClose={() => setSettingsModalVisible(false)}
+          backgroundImage={backgroundImage}
+          onImageSelect={handleBackgroundImageChange}
+          onDataDeleted={() => {
+            // 데이터 삭제 후 필요한 경우 리로드
+          }}
         />
+
+        {/* 만료 경고 모달 */}
+        <ExpiryWarningModal
+          visible={expiryWarningVisible}
+          expiringData={expiringData}
+          onClose={handleCloseExpiryWarning}
+        />
+        {/* 이미지 다운로드 버튼 (완료 시에만 표시) */}
+        {isAllCompleted && data?.reflection && (
+          <View style={styles.downloadButtonContainer}>
+            <TouchableOpacity
+              style={styles.downloadButton}
+              onPress={handleDownloadImage}
+              accessibilityRole="button"
+              accessibilityLabel="이미지로 다운로드하기"
+            >
+              <Text style={styles.downloadButtonText}>
+                📥 이미지로 다운로드하기
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </SafeAreaView>
     </>
   );
@@ -207,7 +390,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 12,
-    backgroundColor: MANDALART_COLORS.common.surface,
+    backgroundColor: 'transparent',
   },
   headerTitle: {
     fontSize: 28,
@@ -253,6 +436,23 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: MANDALART_COLORS.common.error,
+  },
+  downloadButtonContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  downloadButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#007aff',
+    borderRadius: 99,
+    borderWidth: 0,
+  },
+  downloadButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#ffffff',
   },
 });
 

@@ -14,6 +14,21 @@ export interface SubGoal {
   actions: ActionItem[]; // 8개의 실행 항목
 }
 
+// 회고 데이터
+export interface Reflection {
+  emoji: string;
+  text: string;
+}
+
+// 회고 이모티콘 옵션
+export const REFLECTION_EMOJIS = [
+  { emoji: '😵‍💫', label: '매우 아쉽다' },
+  { emoji: '😔', label: '아쉽다' },
+  { emoji: '🙂', label: '보통' },
+  { emoji: '😆', label: '잘했다' },
+  { emoji: '🥳', label: '매우 잘했다' },
+] as const;
+
 // 만다라트 전체 구조
 export interface MandalartData {
   id: string;
@@ -22,6 +37,7 @@ export interface MandalartData {
   period: 'monthly' | 'yearly';
   year: number;
   month?: number; // monthly인 경우에만
+  reflection?: Reflection; // 완료 시 회고 데이터
   createdAt: string;
   updatedAt: string;
 }

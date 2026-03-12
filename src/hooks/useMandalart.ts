@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MandalartData, SubGoal, ActionItem } from '../types/mandalart';
+import { MandalartData, SubGoal, ActionItem, Reflection } from '../types/mandalart';
 import { loadOrCreateMandalart, saveMandalart } from '../storage/mandalartStorage';
 
 export function useMandalart(period: 'monthly' | 'yearly', year: number, month?: number) {
@@ -99,6 +99,43 @@ export function useMandalart(period: 'monthly' | 'yearly', year: number, month?:
     await updateAction(subGoalIndex, actionIndex, { completed: !currentAction.completed });
   }, [data, updateAction]);
 
+  // 모든 액션 완료 처리
+  const completeAllActions = useCallback(async (subGoalIndex: number) => {
+    if (!data) return;
+    
+    const updatedSubGoals = [...data.subGoals];
+    const updatedActions = updatedSubGoals[subGoalIndex].actions.map(action => ({
+      ...action,
+      completed: true,
+    }));
+    updatedSubGoals[subGoalIndex] = { ...updatedSubGoals[subGoalIndex], actions: updatedActions };
+    
+    const updated = { ...data, subGoals: updatedSubGoals };
+    setData(updated);
+    
+    setSaving(true);
+    try {
+      await saveMandalart(updated);
+    } finally {
+      setSaving(false);
+    }
+  }, [data]);
+
+  // 회고 저장
+  const saveReflection = useCallback(async (reflection: Reflection) => {
+    if (!data) return;
+    
+    const updated = { ...data, reflection };
+    setData(updated);
+    
+    setSaving(true);
+    try {
+      await saveMandalart(updated);
+    } finally {
+      setSaving(false);
+    }
+  }, [data]);
+
   return {
     data,
     loading,
@@ -107,6 +144,8 @@ export function useMandalart(period: 'monthly' | 'yearly', year: number, month?:
     updateSubGoal,
     updateAction,
     toggleActionComplete,
+    completeAllActions,
+    saveReflection,
   };
 }
 

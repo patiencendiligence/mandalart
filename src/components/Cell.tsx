@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { MANDALART_COLORS, getSubGoalColor } from '../utils/colors';
+import { MANDALART_COLORS, LIQUID_GLASS_STYLE } from '../utils/colors';
 
 interface CellProps {
   text: string;
@@ -18,6 +18,11 @@ interface CellProps {
   size?: 'small' | 'medium' | 'large';
   cellSize?: number;
   noBorder?: boolean;
+  // Liquid Glass merge 관련 props
+  mergeTop?: boolean;
+  mergeBottom?: boolean;
+  mergeLeft?: boolean;
+  mergeRight?: boolean;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -32,27 +37,85 @@ export function Cell({
   size = 'medium',
   cellSize = 45,
   noBorder = false,
+  mergeTop = false,
+  mergeBottom = false,
+  mergeLeft = false,
+  mergeRight = false,
 }: CellProps) {
-  const colors = type === 'main' 
-    ? MANDALART_COLORS.main 
-    : getSubGoalColor(subGoalIndex);
+  const fontSize = Math.max(10, cellSize * 0.18);
+  const borderRadius = cellSize * 0.12;
   
-  const fontSize = Math.max(8, cellSize * 0.2);
+  // 완료 상태에 따른 Liquid Glass 스타일
+  const glassStyle = completed 
+    ? LIQUID_GLASS_STYLE.cellCompleted 
+    : LIQUID_GLASS_STYLE.cell;
+
+  // Merge 방향에 따른 borderRadius 조정
+  const getMergedBorderRadius = () => {
+    return {
+      borderTopLeftRadius: (mergeTop || mergeLeft) ? 2 : borderRadius,
+      borderTopRightRadius: (mergeTop || mergeRight) ? 2 : borderRadius,
+      borderBottomLeftRadius: (mergeBottom || mergeLeft) ? 2 : borderRadius,
+      borderBottomRightRadius: (mergeBottom || mergeRight) ? 2 : borderRadius,
+    };
+  };
+
+  // Merge 방향에 따른 border 숨김
+  const getMergedBorders = () => {
+    return {
+      borderTopWidth: 0,
+      borderBottomWidth: 0,
+      borderLeftWidth: 0,
+      borderRightWidth: 0,
+    };
+  };
+
+  const mergedRadius = completed ? getMergedBorderRadius() : { borderRadius };
+  const mergedBorders = { borderWidth: 0 };
   
+  // 기본 마진 및 완료된 셀 연결 시 마진 조정
+  const baseMargin = 3; // 기본 마진 (CELL_GAP/2)
+  const getMergedMargins = () => {
+    if (!completed) {
+      return {
+        margin: baseMargin,
+      };
+    }
+    return {
+      marginTop: mergeTop ? 0 : baseMargin,
+      marginBottom: mergeBottom ? 0 : baseMargin,
+      marginLeft: mergeLeft ? 0 : baseMargin,
+      marginRight: mergeRight ? 0 : baseMargin,
+    };
+  };
+  
+  const mergedMargins = getMergedMargins();
+
   const dynamicStyles = {
     cell: {
       width: cellSize,
       height: cellSize,
-      backgroundColor: isCenter ? colors.bg : (type === 'main' ? colors.bg : colors.bg),
-      borderColor: colors.border,
-      opacity: completed ? 0.6 : 1,
-      borderWidth: noBorder ? 0 : undefined,
+      backgroundColor: glassStyle.backgroundColor,
+      borderWidth: 0,
+      ...mergedRadius,
+      ...mergedMargins,
+      shadowColor: glassStyle.shadowColor,
+      shadowOffset: glassStyle.shadowOffset,
+      shadowOpacity: glassStyle.shadowOpacity,
+      shadowRadius: glassStyle.shadowRadius,
+      elevation: completed ? 5 : 4,
     },
     text: {
-      color: colors.text,
+      color: '#333',
       fontSize,
-      textDecorationLine: completed ? 'line-through' as const : 'none' as const,
+      opacity: completed ? 0.6 : 1,
     },
+  };
+
+  const getAccessibilityLabel = () => {
+    if (type === 'main') return `최종 목표: ${text || '미입력'}`;
+    if (type === 'subGoal') return `세부목표 ${subGoalIndex + 1}: ${text || '미입력'}`;
+    return `실행계획: ${text || '미입력'}${completed ? ', 완료됨' : ''}`;
   };
 
   return (
@@ -65,6 +128,9 @@ export function Cell({
       ]}
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={getAccessibilityLabel()}
+      accessibilityState={{ disabled: !onPress }}
     >
       <Text
         style={[styles.text, dynamicStyles.text]}
@@ -73,6 +139,12 @@ export function Cell({
       >
         {text || (isCenter ? '목표' : '+')}
       </Text>
+      
+      {completed && (
+        <View style={styles.checkBadge}>
+          <Text style={styles.checkText}>✓</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 }
@@ -81,22 +153,37 @@ const styles = StyleSheet.create({
   cell: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 0.5,
-    borderRadius: 4,
-    padding: 1,
-    margin: 0,
+    padding: 6,
   },
   
-  centerCell: {
-    borderWidth: 1,
-  },
+  centerCell: {},
+  
   mainCell: {
-    borderWidth: 1,
+    backgroundColor: 'rgba(187, 187, 188, 0.18)',
   },
 
   text: {
     fontWeight: '500',
     textAlign: 'center',
+    color: '#333',
+  },
+
+  checkBadge: {
+    position: 'absolute',
+    top: 3,
+    right: 3,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#34c759',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  checkText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '700',
   },
 });
 

@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MandalartData, createEmptyMandalart } from '../types/mandalart';
 
 const STORAGE_KEY_PREFIX = '@mandalart_';
+const DATA_EXPIRY_YEARS = 2;
+const WARNING_MONTHS_BEFORE = 1;
 
 // 만다라트 저장
 export async function saveMandalart(data: MandalartData): Promise<void> {
@@ -73,6 +75,142 @@ export async function deleteMandalart(id: string): Promise<void> {
   } catch (error) {
     console.error('Failed to delete mandalart:', error);
     throw error;
+  }
+}
+
+// 데이터의 날짜 정보 파싱
+function parseMandalartDate(data: MandalartData): Date {
+  if (data.period === 'yearly') {
+    return new Date(data.year, 11, 31); // 연간 목표는 해당 연도 말
+  }
+  return new Date(data.year, (data.month || 1) - 1, 1); // 월간 목표는 해당 월 초
+}
+
+// 만료 예정 데이터 조회 (1개월 전 경고 대상)
+export async function getExpiringMandalarts(): Promise<MandalartData[]> {
+  try {
+    const allData = await getAllMandalarts();
+    const now = new Date();
+    const warningDate = new Date(
+      now.getFullYear() - DATA_EXPIRY_YEARS,
+      now.getMonth() + WARNING_MONTHS_BEFORE,
+      now.getDate()
+    );
+    const expiryDate = new Date(
+      now.getFullYear() - DATA_EXPIRY_YEARS,
+      now.getMonth(),
+      now.getDate()
+    );
+
+    return allData.filter(data => {
+      const dataDate = parseMandalartDate(data);
+      // 만료 1개월 전 ~ 만료일 사이의 데이터
+      return dataDate <= warningDate && dataDate > expiryDate;
+    });
+  } catch (error) {
+    console.error('Failed to get expiring mandalarts:', error);
+    return [];
+  }
+}
+
+// 만료된 데이터 조회 (2년 경과)
+export async function getExpiredMandalarts(): Promise<MandalartData[]> {
+  try {
+    const allData = await getAllMandalarts();
+    const now = new Date();
+    const expiryDate = new Date(
+      now.getFullYear() - DATA_EXPIRY_YEARS,
+      now.getMonth(),
+      now.getDate()
+    );
+
+    return allData.filter(data => {
+      const dataDate = parseMandalartDate(data);
+      return dataDate <= expiryDate;
+    });
+  } catch (error) {
+    console.error('Failed to get expired mandalarts:', error);
+    return [];
+  }
+}
+
+// 만료된 데이터 자동 삭제
+export async function deleteExpiredMandalarts(): Promise<number> {
+  try {
+    const expiredData = await getExpiredMandalarts();
+    for (const data of expiredData) {
+      await deleteMandalart(data.id);
+    }
+    return expiredData.length;
+  } catch (error) {
+    console.error('Failed to delete expired mandalarts:', error);
+    return 0;
+  }
+}
+
+// 당월 이전 데이터 조회
+export async function getPastMandalarts(): Promise<MandalartData[]> {
+  try {
+    const allData = await getAllMandalarts();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    return allData.filter(data => {
+      if (data.period === 'yearly') {
+        return data.year < currentYear;
+      }
+      // monthly
+      if (data.year < currentYear) return true;
+      if (data.year === currentYear && (data.month || 1) < currentMonth) return true;
+      return false;
+    });
+  } catch (error) {
+    console.error('Failed to get past mandalarts:', error);
+    return [];
+  }
+}
+
+// 당월 이전 데이터 전체 삭제
+export async function deletePastMandalarts(): Promise<number> {
+  try {
+    const pastData = await getPastMandalarts();
+    for (const data of pastData) {
+      await deleteMandalart(data.id);
+    }
+    return pastData.length;
+  } catch (error) {
+    console.error('Failed to delete past mandalarts:', error);
+    return 0;
+  }
+}
+
+// 경고 알림 표시 여부 확인 (하루에 한 번만)
+const WARNING_SHOWN_KEY = '@mandalart_warning_shown_date';
+
+export async function shouldShowExpiryWarning(): Promise<boolean> {
+  try {
+    const lastShown = await AsyncStorage.getItem(WARNING_SHOWN_KEY);
+    const today = new Date().toISOString().split('T')[0];
+    
+    if (lastShown === today) {
+      return false;
+    }
+    
+    const expiringData = await getExpiringMandalarts();
+    return expiringData.length > 0;
+  } catch (error) {
+    console.error('Failed to check expiry warning:', error);
+    return false;
+  }
+}
+
+export async function markWarningShown(): Promise<void> {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    await AsyncStorage.setItem(WARNING_SHOWN_KEY, today);
+  } catch (error) {
+    console.error('Failed to mark warning shown:', error);
   }
 }
 

@@ -21,7 +21,12 @@ export function InfoModal({ visible, onClose }: InfoModalProps) {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>만다라트(Mandalart)</Text>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="닫기"
+          >
             <Text style={styles.closeButtonText}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -31,7 +36,7 @@ export function InfoModal({ visible, onClose }: InfoModalProps) {
             <Text style={styles.sectionTitle}>📖 유래</Text>
             <Text style={styles.sectionText}>
               만다라트는 일본의 프로 야구 선수 오타니 쇼헤이가 고안한 목표 달성 기법입니다. 
-              "Mandala"와 "Art"를 합친 이름으로, 9×9 그리드 형태의 구조를 통해 
+              "Mandala"와 "Art"를 합친 이름으로, 9*9 그리드 형태의 구조를 통해 
               목표를 체계적으로 분해하고 관리합니다.
             </Text>
           </View>
@@ -100,69 +105,76 @@ export function InfoModal({ visible, onClose }: InfoModalProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MANDALART_COLORS.common.background,
+    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: MANDALART_COLORS.common.border,
+    paddingVertical: 14,
+    backgroundColor: '#f5f5f5',
+    borderBottomWidth: 0,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: MANDALART_COLORS.common.text,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
   },
   closeButton: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    borderRadius: 99,
+    borderWidth: 0,
   },
   closeButtonText: {
-    fontSize: 24,
-    color: MANDALART_COLORS.common.textMuted,
+    fontSize: 18,
+    color: '#666',
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 16,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
+    backgroundColor: 'rgba(187, 187, 188, 0.1)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 0,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: MANDALART_COLORS.common.text,
-    marginBottom: 12,
+    color: '#2a3a4a',
+    marginBottom: 14,
   },
   sectionText: {
     fontSize: 15,
     lineHeight: 24,
-    color: MANDALART_COLORS.common.textMuted,
+    color: '#5a6a7a',
   },
   step: {
     marginBottom: 16,
   },
   stepNumber: {
     fontSize: 15,
-    fontWeight: '600',
-    color: MANDALART_COLORS.main.text,
+    fontWeight: '700',
+    color: '#3498db',
     marginBottom: 6,
   },
   stepText: {
     fontSize: 14,
     lineHeight: 22,
-    color: MANDALART_COLORS.common.textMuted,
+    color: '#5a6a7a',
   },
   tipText: {
     fontSize: 14,
     lineHeight: 22,
-    color: MANDALART_COLORS.common.textMuted,
+    color: '#5a6a7a',
     marginBottom: 8,
     marginLeft: 8,
   },
