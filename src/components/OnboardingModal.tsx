@@ -121,30 +121,32 @@ export function OnboardingModal({
                   />
                 </View>
                 <Text style={styles.charCount}>{mainGoal.length}/50</Text>
-                <TouchableOpacity 
-                  style={[styles.button, !isButtonEnabled && styles.buttonDisabled]}
-                  onPress={handleSubmit}
-                  onPressIn={handlePressIn}
-                  onPressOut={handlePressOut}
-                  activeOpacity={0.9}
-                  disabled={!isButtonEnabled}
-                  accessibilityRole="button"
-                  accessibilityLabel="시작"
-                >
-                  <Text style={[styles.buttonText, !isButtonEnabled && styles.buttonTextDisabled]}>시작</Text>
-                </TouchableOpacity>
+                <View style={styles.buttonRow}>
+                  {onClose && (
+                    <TouchableOpacity 
+                      style={styles.cancelButton} 
+                      onPress={onClose} 
+                      activeOpacity={0.8}
+                      accessibilityRole="button"
+                      accessibilityLabel="닫기"
+                    >
+                      <Text style={styles.cancelButtonText}>닫기</Text>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity 
+                    style={[styles.submitButton, !isButtonEnabled && styles.buttonDisabled]}
+                    onPress={handleSubmit}
+                    onPressIn={handlePressIn}
+                    onPressOut={handlePressOut}
+                    activeOpacity={0.9}
+                    disabled={!isButtonEnabled}
+                    accessibilityRole="button"
+                    accessibilityLabel="시작"
+                  >
+                    <Text style={[styles.buttonText, !isButtonEnabled && styles.buttonTextDisabled]}>시작</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            {onClose && (
-              <TouchableOpacity 
-                style={styles.closeIconButton} 
-                onPress={onClose} 
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityLabel="닫기"
-              >
-                <Text style={styles.closeIconText}>×</Text>
-              </TouchableOpacity>
-            )}
             </Animated.View>
           </View>
         </View>
@@ -156,26 +158,35 @@ export function OnboardingModal({
 const CIRCLE_SIZE = 250;
 
 const styles = StyleSheet.create({
-    closeIconButton: {
-      position: 'absolute',
-      top: 10,
-      right: 10,
-      zIndex: 10,
-      width: 28,
-      height: 28,
-      borderRadius: 99,
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 0,
-    },
-    closeIconText: {
-      color: '#fff',
-      fontSize: 18,
-      fontWeight: '500',
-      lineHeight: 18,
-      textAlign: 'center',
-    },
+  buttonRow: {
+    flexDirection: 'row',
+    width: '85%',
+    gap: 8,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 99,
+    // Liquid glass 스타일 (어두운 버전)
+    backgroundColor: 'rgba(160, 160, 165, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.35)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.12)',
+    borderRightColor: 'rgba(0, 0, 0, 0.1)',
+    shadowColor: 'rgba(0, 0, 0, 0.12)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cancelButtonText: {
+    color: '#444',
+    fontSize: 12,
+    fontWeight: '600',
+  },
   modalBackdrop: {
     flex: 1,
     backgroundColor: '#e8e8e9',
@@ -197,22 +208,30 @@ const styles = StyleSheet.create({
     width: CIRCLE_SIZE,
     height: CIRCLE_SIZE,
     borderRadius: CIRCLE_SIZE / 2,
-    borderWidth: 0,
-    backgroundColor: 'rgba(187, 187, 188, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   circle: {
     width: CIRCLE_SIZE,
     height: CIRCLE_SIZE,
     borderRadius: CIRCLE_SIZE / 2,
-    backgroundColor: 'rgba(187, 187, 188, 0.12)',
-    borderWidth: 0,
+    // Liquid glass 배경
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 4 },
+    // Liquid glass border
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.8)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.7)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    borderRightColor: 'rgba(0, 0, 0, 0.08)',
+    // Shadow
+    shadowColor: 'rgba(0, 0, 0, 0.2)',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowRadius: 20,
+    elevation: 10,
   },
   circleTouchable: {
     width: '100%',
@@ -227,7 +246,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 14,
     textAlign: 'center',
-    marginBottom: 2,
+    marginBottom: 5,
     fontWeight: '600',
   },
   smallHint: {
@@ -241,38 +260,62 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 28,
+    height: 62,
     textAlign: 'center',
     color: '#2a3a4a',
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '600',
-    padding: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     marginBottom: 4,
+    // Liquid glass 스타일
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.8)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.7)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.06)',
+    // 웹에서 포커스 시 파란 outline 제거
+    outlineStyle: 'none' as any,
   },
   charCount: {
     color: '#8a9aaa',
     fontSize: 10,
     marginBottom: 6,
   },
-  button: {
-    width: '85%',
+  submitButton: {
+    flex: 1,
     paddingVertical: 10,
     borderRadius: 99,
-    backgroundColor: '#007aff',
-    borderWidth: 0,
+    // Liquid glass 스타일
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.8)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.7)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    borderRightColor: 'rgba(0, 0, 0, 0.08)',
+    shadowColor: 'rgba(0, 0, 0, 0.12)',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 4,
   },
   buttonDisabled: { 
-    opacity: 0.4,
-    backgroundColor: 'rgba(187, 187, 188, 0.3)',
+    opacity: 0.5,
+    backgroundColor: 'rgba(200, 200, 205, 0.4)',
   },
   buttonText: {
-    color: '#ffffff',
+    color: '#333',
     fontSize: 12,
     fontWeight: '700',
   },
-  buttonTextDisabled: { opacity: 0.7 },
+  buttonTextDisabled: { 
+    opacity: 0.6,
+    color: '#666',
+  },
 });
         
 

@@ -136,6 +136,13 @@ export function HomeScreen() {
     prevAllCompletedRef.current = isAllCompleted;
   }, [isAllCompleted, data?.reflection]);
 
+  // 목표가 없을 때 자동으로 온보딩 표시
+  useEffect(() => {
+    if (!loading && data && !data.mainGoal?.trim()) {
+      setOnboardingVisible(true);
+    }
+  }, [loading, data, period, year, month]);
+
   // 셀 클릭 핸들러
   const handleCellPress = useCallback((
     type: 'main' | 'subGoal' | 'action',

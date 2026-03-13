@@ -402,6 +402,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 6,
     elevation: 2,
+    // 웹에서 포커스 시 파란 outline 제거
+    outlineStyle: 'none' as any,
   },
   toggleRow: {
     flexDirection: 'row',
