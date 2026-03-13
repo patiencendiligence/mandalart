@@ -105,11 +105,32 @@ export function Cell({
   const mergedMargins = getMergedMargins();
   const mergedSize = getMergedSize();
 
-  // 웹에서 backdrop blur 효과
-  const webBlurStyle = Platform.select({
+  // 플랫폼별 스타일
+  const platformStyle = Platform.select({
     web: {
       backdropFilter: 'blur(6px)',
       WebkitBackdropFilter: 'blur(6px)',
+      borderTopColor: glassStyle.borderTopColor,
+      borderLeftColor: glassStyle.borderLeftColor,
+      borderBottomColor: glassStyle.borderBottomColor,
+      borderRightColor: glassStyle.borderRightColor,
+    },
+    android: {
+      // Android에서는 개별 border 색상이 지원되지 않으므로 단일 색상 사용
+      borderColor: completed ? 'rgba(200, 200, 200, 0.5)' : 'rgba(255, 255, 255, 0.4)',
+      // Android shadow
+      elevation: completed ? 0 : 3,
+    },
+    ios: {
+      borderTopColor: glassStyle.borderTopColor,
+      borderLeftColor: glassStyle.borderLeftColor,
+      borderBottomColor: glassStyle.borderBottomColor,
+      borderRightColor: glassStyle.borderRightColor,
+      // iOS shadow
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: completed ? 0 : 0.1,
+      shadowRadius: 4,
     },
     default: {},
   });
@@ -118,19 +139,11 @@ export function Cell({
     cell: {
       ...mergedSize,
       backgroundColor: glassStyle.backgroundColor,
-      // Liquid glass border
       borderWidth: glassStyle.borderWidth,
-      borderTopColor: glassStyle.borderTopColor,
-      borderLeftColor: glassStyle.borderLeftColor,
-      borderBottomColor: glassStyle.borderBottomColor,
-      borderRightColor: glassStyle.borderRightColor,
       ...mergedRadius,
       ...mergedBorderWidths,
       ...mergedMargins,
-
-      elevation: completed ? 0 : 4,
-      // Backdrop blur (web)
-      ...webBlurStyle,
+      ...platformStyle,
     },
     text: {
       color: '#333',

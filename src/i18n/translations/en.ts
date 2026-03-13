@@ -99,6 +99,8 @@ export const en: TranslationKeys = {
     selectImage: 'Select Image',
     changeImage: 'Change Image',
     removeImage: 'Remove',
+    permissionRequired: 'Permission Required',
+    permissionMessage: 'Gallery access permission is required to select an image.',
     dataManagement: 'Data Management',
     dataManagementDesc: 'Delete all mandalart data before the current month.\n(Data is automatically deleted after 2 years)',
     deletePastData: 'Delete Past Data',

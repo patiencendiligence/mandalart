@@ -57,10 +57,24 @@ export async function getAllMandalarts(): Promise<MandalartData[]> {
     const mandalartKeys = keys.filter(key => key.startsWith(STORAGE_KEY_PREFIX));
     const items = await AsyncStorage.multiGet(mandalartKeys);
     
-    return items
-      .map(([_, value]) => (value ? JSON.parse(value) : null))
-      .filter((item): item is MandalartData => item !== null)
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    const results: MandalartData[] = [];
+    for (const [key, value] of items) {
+      if (!value) continue;
+      try {
+        const parsed = JSON.parse(value);
+        if (parsed && typeof parsed === 'object' && parsed.id) {
+          results.push(parsed);
+        }
+      } catch (parseError) {
+        console.warn(`Invalid JSON for key ${key}, removing corrupted data`);
+        // 손상된 데이터 삭제
+        await AsyncStorage.removeItem(key);
+      }
+    }
+    
+    return results.sort((a, b) => 
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
   } catch (error) {
     console.error('Failed to get all mandalarts:', error);
     return [];
@@ -185,15 +199,29 @@ export async function deletePastMandalarts(): Promise<number> {
   }
 }
 
-// 경고 알림 표시 여부 확인 (하루에 한 번만)
-const WARNING_SHOWN_KEY = '@mandalart_warning_shown_date';
+// 경고 알림 표시 여부 확인 (매월 말일에 한 번만)
+const WARNING_SHOWN_KEY = '@mandalart_warning_shown_month';
+
+// 오늘이 해당 월의 말일인지 확인
+function isLastDayOfMonth(): boolean {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  return tomorrow.getMonth() !== today.getMonth();
+}
 
 export async function shouldShowExpiryWarning(): Promise<boolean> {
   try {
-    const lastShown = await AsyncStorage.getItem(WARNING_SHOWN_KEY);
-    const today = new Date().toISOString().split('T')[0];
+    // 말일이 아니면 표시하지 않음
+    if (!isLastDayOfMonth()) {
+      return false;
+    }
+
+    const lastShownMonth = await AsyncStorage.getItem(WARNING_SHOWN_KEY);
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM 형식
     
-    if (lastShown === today) {
+    // 이번 달에 이미 표시했으면 표시하지 않음
+    if (lastShownMonth === currentMonth) {
       return false;
     }
     
@@ -207,8 +235,8 @@ export async function shouldShowExpiryWarning(): Promise<boolean> {
 
 export async function markWarningShown(): Promise<void> {
   try {
-    const today = new Date().toISOString().split('T')[0];
-    await AsyncStorage.setItem(WARNING_SHOWN_KEY, today);
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM 형식
+    await AsyncStorage.setItem(WARNING_SHOWN_KEY, currentMonth);
   } catch (error) {
     console.error('Failed to mark warning shown:', error);
   }

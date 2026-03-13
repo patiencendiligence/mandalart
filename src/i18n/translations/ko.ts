@@ -97,6 +97,8 @@ export const ko = {
     selectImage: '이미지 선택',
     changeImage: '이미지 변경',
     removeImage: '제거',
+    permissionRequired: '권한 필요',
+    permissionMessage: '이미지를 선택하려면 갤러리 접근 권한이 필요합니다.',
     dataManagement: '데이터 관리',
     dataManagementDesc: '당월 이전의 모든 만다라트 데이터를 삭제합니다.\n(데이터는 2년 후 자동 삭제됩니다)',
     deletePastData: '지난 데이터 삭제',

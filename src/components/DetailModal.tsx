@@ -1,11 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   Modal,
   StyleSheet,
   TouchableOpacity,
-  Animated,
   ScrollView,
   useWindowDimensions,
   Platform,
@@ -66,8 +65,6 @@ export function DetailModal({
   onCompleteAll,
 }: DetailModalProps) {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
   const { t, formatText } = useTranslation();
 
   // 반응형 크기 계산
@@ -76,37 +73,6 @@ export function DetailModal({
   const cellSize = Math.floor((gridWidth - GRID_GAP * 2) / 3);
   const actualGridWidth = cellSize * 3 + GRID_GAP * 2;
   const cellBorderRadius = cellSize * 0.2;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 65,
-          friction: 10,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(scaleAnim, {
-          toValue: 0.8,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [visible]);
 
   if (!subGoal) return null;
 
@@ -143,14 +109,12 @@ export function DetailModal({
           activeOpacity={1} 
         />
         
-        <Animated.View
+        <View
           style={[
             styles.modalContainer,
             {
               width: modalWidth,
               maxHeight: windowHeight * 0.85,
-              transform: [{ scale: scaleAnim }],
-              opacity: opacityAnim,
             },
           ]}
         >
@@ -357,7 +321,7 @@ export function DetailModal({
               </Text>
             </View>
           </ScrollView>
-        </Animated.View>
+        </View>
       </View>
     </Modal>
   );
@@ -371,23 +335,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
   },
   modalContainer: {
-    backgroundColor: 'rgba(242, 242, 247, 0.95)',
+    backgroundColor: 'rgba(242, 242, 247, 0.98)',
     borderRadius: 24,
-    overflow: 'hidden',
-    // Liquid glass border
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-    borderRightColor: 'rgba(0, 0, 0, 0.08)',
-    // Outer shadow
-    shadowColor: 'rgba(0, 0, 0, 0.25)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 24,
-    elevation: 20,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    zIndex: 1,
+    minHeight: 450,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 8,
+      },
+      default: {},
+    }),
   },
   glassHighlight: {
     display: 'none',
@@ -421,17 +394,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 99,
     backgroundColor: 'rgba(240, 240, 242, 0.8)',
-    // Liquid glass border
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.6)',
-    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
-    borderRightColor: 'rgba(0, 0, 0, 0.05)',
-    // Shadow
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderColor: 'rgba(200, 200, 200, 0.5)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   closeText: {
     fontSize: 16,
@@ -439,10 +415,12 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
   },
   contentContainer: {
     padding: 20,
+    paddingBottom: 30,
     alignItems: 'center',
   },
   sectionHeader: {
@@ -499,22 +477,32 @@ const styles = StyleSheet.create({
   centerCell: {
     justifyContent: 'center',
     alignItems: 'center',
-    // 반투명 배경 (blur 효과와 함께)
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     padding: 12,
     overflow: 'hidden',
-    // Liquid glass outer shadow
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 6,
-    // Subtle border for depth
     borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.7)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
-    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
-    borderRightColor: 'rgba(0, 0, 0, 0.05)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        borderTopColor: 'rgba(255, 255, 255, 0.7)',
+        borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+        borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+        borderRightColor: 'rgba(0, 0, 0, 0.05)',
+      },
+      android: {
+        elevation: 3,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
+      },
+      default: {
+        borderTopColor: 'rgba(255, 255, 255, 0.7)',
+        borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+        borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+        borderRightColor: 'rgba(0, 0, 0, 0.05)',
+      },
+    }),
   },
   centerCellText: {
     fontSize: 14,
@@ -528,35 +516,55 @@ const styles = StyleSheet.create({
   actionCell: {
     justifyContent: 'center',
     alignItems: 'center',
-    // 반투명 배경 (blur 효과와 함께)
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     padding: 10,
     position: 'relative',
     overflow: 'hidden',
-    // Liquid glass outer shadow
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 4,
-    // Subtle border for glass effect
     borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.7)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
-    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
-    borderRightColor: 'rgba(0, 0, 0, 0.06)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        borderTopColor: 'rgba(255, 255, 255, 0.7)',
+        borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+        borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+        borderRightColor: 'rgba(0, 0, 0, 0.06)',
+      },
+      android: {
+        elevation: 2,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
+      },
+      default: {
+        borderTopColor: 'rgba(255, 255, 255, 0.7)',
+        borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+        borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+        borderRightColor: 'rgba(0, 0, 0, 0.06)',
+      },
+    }),
   },
   actionCellCompleted: {
-    // Inset 효과: 눌린 느낌의 반투명 배경
     backgroundColor: 'rgba(180, 200, 230, 0.4)',
-    // 외부 shadow 제거
-    shadowOpacity: 0,
-    elevation: 0,
-    // Inset border: 위/왼쪽 어둡게, 아래/오른쪽 밝게
-    borderTopColor: 'rgba(0, 0, 0, 0.15)',
-    borderLeftColor: 'rgba(0, 0, 0, 0.1)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.8)',
-    borderRightColor: 'rgba(255, 255, 255, 0.7)',
+    ...Platform.select({
+      ios: {
+        shadowOpacity: 0,
+        borderTopColor: 'rgba(0, 0, 0, 0.15)',
+        borderLeftColor: 'rgba(0, 0, 0, 0.1)',
+        borderBottomColor: 'rgba(255, 255, 255, 0.8)',
+        borderRightColor: 'rgba(255, 255, 255, 0.7)',
+      },
+      android: {
+        elevation: 0,
+        borderColor: 'rgba(200, 200, 200, 0.5)',
+      },
+      default: {
+        borderTopColor: 'rgba(0, 0, 0, 0.15)',
+        borderLeftColor: 'rgba(0, 0, 0, 0.1)',
+        borderBottomColor: 'rgba(255, 255, 255, 0.8)',
+        borderRightColor: 'rgba(255, 255, 255, 0.7)',
+      },
+    }),
   },
   actionNumber: {
     position: 'absolute',

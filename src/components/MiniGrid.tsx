@@ -113,6 +113,7 @@ export function MiniGrid({
       <View style={styles.cellsContainer}>
         {actionPositions.map((actionIdx, idx) => {
           if (actionIdx === -1) {
+            // 중앙 셀(세부목표)을 클릭하면 DetailModal 열기 (onGridPress)
             return (
               <Cell
                 key={`center-${subGoalIndex}`}
@@ -120,7 +121,7 @@ export function MiniGrid({
                 type="subGoal"
                 subGoalIndex={subGoalIndex}
                 isCenter
-                onPress={() => onCellPress?.('subGoal', subGoalIndex)}
+                onPress={() => onGridPress?.()}
                 cellSize={cellSize}
                 noBorder={!!isGridComplete}
               />

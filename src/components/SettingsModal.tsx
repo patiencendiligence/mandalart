@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { getPastMandalarts, deletePastMandalarts } from '../storage/mandalartStorage';
 import { useI18n, useTranslation, Language } from '../i18n';
 
@@ -88,9 +89,32 @@ export function SettingsModal({
     }
   }, [pastDataCount, onDataDeleted, t, formatText]);
 
-  const handleSelectImage = () => {
+  const handleSelectImage = async () => {
     if (Platform.OS === 'web') {
       fileInputRef.current?.click();
+    } else {
+      // iOS/Android: expo-image-picker 사용
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          t.settingsModal.permissionRequired || '권한 필요',
+          t.settingsModal.permissionMessage || '이미지를 선택하려면 갤러리 접근 권한이 필요합니다.',
+          [{ text: t.common.ok || '확인' }]
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [9, 16],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        onImageSelect(result.assets[0].uri);
+      }
     }
   };
 
