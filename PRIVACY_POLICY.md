@@ -66,7 +66,7 @@
 
 # Privacy Policy
 
-**Last Updated: March 2024**
+**Last Updated: March 2026**
 
 ## 1. Overview
 
