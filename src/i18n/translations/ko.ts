@@ -9,6 +9,7 @@ export const ko = {
     loading: '불러오는 중...',
     saving: '저장 중...',
     error: '데이터를 불러올 수 없습니다',
+  
   },
   
   periodSelector: {

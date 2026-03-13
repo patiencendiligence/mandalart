@@ -98,9 +98,10 @@ export function SettingsModal({
       
       if (status !== 'granted') {
         Alert.alert(
-          t.settingsModal.permissionRequired || '권한 필요',
-          t.settingsModal.permissionMessage || '이미지를 선택하려면 갤러리 접근 권한이 필요합니다.',
-          [{ text: t.common.ok || '확인' }]
+          t.settingsModal.permissionRequired || "권한 필요",
+          t.settingsModal.permissionMessage ||
+            "이미지를 선택하려면 갤러리 접근 권한이 필요합니다.",
+          [{ text: t.common.confirm || "확인" }],
         );
         return;
       }
