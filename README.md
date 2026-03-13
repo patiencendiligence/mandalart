@@ -11,7 +11,7 @@
 
 ## 사용해보기
 
-- **웹**:https://dist-pi-sepia.vercel.app
+- **웹**: https://dist-pi-sepia.vercel.app
 - **앱**: 앱스토어 / 구글 플레이 등록중
 - **크롬확장프로그램**: 등록중
 
@@ -122,5 +122,133 @@ mandalart/
 - **React Native Reanimated**
 
 ## 📄 라이선스
+
+MIT License
+
+---
+
+# Mandalart Goal Planning App (English)
+
+<p align="center">
+  <img src="./assets/no-plans-meme.png" width="300" alt="No plans yet?"/>
+</p>
+
+<p align="center"><strong>No plans yet? Don't worry!</strong></p>
+
+A goal planning app utilizing the **Mandalart** technique, made famous by Shohei Ohtani's goal achievement method.
+
+## Try It Out
+
+- **Web**: https://dist-pi-sepia.vercel.app
+- **App**: Coming soon to App Store / Google Play
+- **Chrome Extension**: Coming soon
+
+## 📱 Features
+
+### 9-Block Interface
+
+- **Center**: Main Goal
+- **Surrounding 8 cells**: Sub Goals
+- **Around each sub goal**: 8 Action Items
+
+### Intuitive Zoom In/Out
+
+- Full 9x9 grid overview
+- Zoom into detail modal on sub goal click
+- Mobile-optimized UI
+
+### Time-Based Planning
+
+- **Monthly Plan**: Set goals for each month
+- **Yearly Plan**: Set big-picture annual goals
+
+### Local Storage
+
+- Auto-save to device (AsyncStorage)
+- No internet connection required
+
+### User Settings
+
+- Set your favorite image as background
+- Save completed goal images to your device when all goals are achieved!
+- Language settings available (EN/KR)
+
+## 🚀 Getting Started
+
+### Installation
+
+```bash
+cd mandalart
+npm install
+```
+
+### Running
+
+```bash
+# Start Expo development server
+npm start
+
+# iOS Simulator
+npm run ios
+
+# Android Emulator
+npm run android
+```
+
+### Building
+
+```bash
+# Android APK/AAB build
+npm run build:android
+
+# iOS IPA build
+npm run build:ios
+```
+
+## 📂 Project Structure
+
+```
+mandalart/
+├── App.tsx                 # App entry point
+├── src/
+│   ├── components/         # UI components
+│   │   ├── Cell.tsx        # Individual cell
+│   │   ├── MiniGrid.tsx    # 3x3 mini grid
+│   │   ├── MandalartGrid.tsx  # 9x9 full grid
+│   │   ├── EditModal.tsx   # Edit modal
+│   │   ├── DetailModal.tsx # Detail view modal
+│   │   └── PeriodSelector.tsx  # Period selector
+│   ├── hooks/              # Custom hooks
+│   │   └── useMandalart.ts # Mandalart data management
+│   ├── screens/            # Screens
+│   │   └── HomeScreen.tsx  # Main screen
+│   ├── storage/            # Local storage
+│   │   └── mandalartStorage.ts
+│   ├── types/              # TypeScript types
+│   │   └── mandalart.ts
+│   └── utils/              # Utilities
+│       └── colors.ts       # Color palette
+├── app.json                # Expo config
+├── babel.config.js         # Babel config
+├── package.json
+└── tsconfig.json
+```
+
+## 📋 How to Use
+
+1. **Set Main Goal**: Tap the center "Goal" cell and enter your ultimate goal
+2. **Set Sub Goals**: Enter detailed plans in the 8 surrounding cells to achieve your main goal
+3. **Create Action Items**: Tap each sub goal grid to enter 8 specific action items
+4. **Track Progress**: Check off completed action items to monitor your progress
+
+## 🛠 Tech Stack
+
+- **React Native** + **Expo**
+- **TypeScript**
+- **AsyncStorage** (local data storage)
+- **React Native Gesture Handler**
+- **React Native Reanimated**
+
+## 📄 License
 
 MIT License
