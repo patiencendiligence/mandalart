@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
+import { useTranslation } from '../i18n';
 
 
 interface PeriodSelectorProps {
@@ -19,8 +20,6 @@ interface PeriodSelectorProps {
   onSettingsPress?: () => void;
 }
 
-const MONTHS = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-
 export function PeriodSelector({
   period,
   year,
@@ -31,6 +30,7 @@ export function PeriodSelector({
   onInfoPress,
   onSettingsPress,
 }: PeriodSelectorProps) {
+  const { t, language } = useTranslation();
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
@@ -44,7 +44,7 @@ export function PeriodSelector({
             onPress={() => onPeriodChange('monthly')}
           >
             <Text style={[styles.toggleText, period === 'monthly' && styles.toggleTextActive]}>
-              월간
+              {t.periodSelector.monthly}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -52,7 +52,7 @@ export function PeriodSelector({
             onPress={() => onPeriodChange('yearly')}
           >
             <Text style={[styles.toggleText, period === 'yearly' && styles.toggleTextActive]}>
-              연간
+              {t.periodSelector.yearly}
             </Text>
           </TouchableOpacity>
         </View>
@@ -85,7 +85,7 @@ export function PeriodSelector({
             onPress={() => onYearChange(y)}
           >
             <Text style={[styles.yearText, year === y && styles.yearTextActive]}>
-              {y}년
+              {y}{t.periodSelector.yearUnit}
             </Text>
           </TouchableOpacity>
         ))}
@@ -99,7 +99,7 @@ export function PeriodSelector({
           style={styles.monthScroll}
           contentContainerStyle={styles.monthScrollContent}
         >
-          {MONTHS.map((m, idx) => (
+          {t.periodSelector.months.map((m: string, idx: number) => (
             <TouchableOpacity
               key={m}
               style={[styles.monthButton, month === idx + 1 && styles.monthButtonActive]}

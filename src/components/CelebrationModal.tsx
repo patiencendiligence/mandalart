@@ -9,7 +9,8 @@ import {
   Animated,
 } from 'react-native';
 import { MANDALART_COLORS } from '../utils/colors';
-import { REFLECTION_EMOJIS, Reflection } from '../types/mandalart';
+import { Reflection } from '../types/mandalart';
+import { useTranslation } from '../i18n';
 
 interface CelebrationModalProps {
   visible: boolean;
@@ -26,6 +27,15 @@ export function CelebrationModal({
 }: CelebrationModalProps) {
   const [selectedEmoji, setSelectedEmoji] = useState<string>('');
   const [reflectionText, setReflectionText] = useState('');
+  const { t, formatText, getMonthName, language } = useTranslation();
+  
+  const REFLECTION_EMOJIS = [
+    { emoji: '😵‍💫', label: t.reflectionEmojis.veryBad },
+    { emoji: '😔', label: t.reflectionEmojis.bad },
+    { emoji: '🙂', label: t.reflectionEmojis.neutral },
+    { emoji: '😆', label: t.reflectionEmojis.good },
+    { emoji: '🥳', label: t.reflectionEmojis.veryGood },
+  ];
   
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -84,13 +94,15 @@ export function CelebrationModal({
             <Text style={styles.celebrationEmoji}>🎉</Text>
           </View>
           
-          <Text style={styles.title}>축하합니다!</Text>
+          <Text style={styles.title}>{t.celebrationModal.congratulations}</Text>
           <Text style={styles.subtitle}>
-            {year}년 {month}월 목표를 모두 달성했어요!
+            {language === 'ko' 
+              ? formatText(t.celebrationModal.achievedGoal, { year, month })
+              : formatText(t.celebrationModal.achievedGoal, { year, month: getMonthName(month) })}
           </Text>
 
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>이번 달을 평가해주세요</Text>
+            <Text style={styles.sectionLabel}>{t.celebrationModal.evaluateMonth}</Text>
             <View style={styles.emojiContainer}>
               {REFLECTION_EMOJIS.map((item) => (
                 <TouchableOpacity
@@ -117,12 +129,12 @@ export function CelebrationModal({
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>간단한 회고를 남겨주세요</Text>
+            <Text style={styles.sectionLabel}>{t.celebrationModal.leaveReflection}</Text>
             <TextInput
               style={styles.textInput}
               value={reflectionText}
               onChangeText={(text) => setReflectionText(text.slice(0, 15))}
-              placeholder="15자 이내로 작성"
+              placeholder={t.celebrationModal.charLimit}
               placeholderTextColor={MANDALART_COLORS.common.textSecondary}
               maxLength={15}
             />
@@ -137,14 +149,14 @@ export function CelebrationModal({
             onPress={handleSave}
             disabled={!canSave}
             accessibilityRole="button"
-            accessibilityLabel="저장"
+            accessibilityLabel={t.common.save}
             accessibilityState={{ disabled: !canSave }}
           >
             <Text style={[
               styles.saveButtonText,
               !canSave && styles.saveButtonTextDisabled,
             ]}>
-              저장
+              {t.common.save}
             </Text>
           </TouchableOpacity>
         </Animated.View>

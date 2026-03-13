@@ -11,6 +11,7 @@ import {
   Easing,
 } from 'react-native';
 import { MANDALART_COLORS } from '../utils/colors';
+import { useTranslation } from '../i18n';
 import React from 'react';
 
 interface OnboardingModalProps {
@@ -32,6 +33,7 @@ export function OnboardingModal({
 }: OnboardingModalProps) {
   const [mainGoal, setMainGoal] = useState('');
   const pressScale = useRef(new Animated.Value(1)).current;
+  const { t, formatText, getMonthName, language } = useTranslation();
 
   const RIPPLE_COUNT = 3;
   const rippleAnimsRef = useRef<Animated.Value[]>(
@@ -71,7 +73,11 @@ export function OnboardingModal({
     };
   }, [visible]);
 
-  const periodText = period === 'yearly' ? `${year}년` : `${year}년 ${month}월`;
+  const periodText = period === 'yearly' 
+    ? formatText(t.onboarding.periodYearly, { year }) 
+    : (language === 'ko' 
+        ? formatText(t.onboarding.periodMonthly, { year, month }) 
+        : formatText(t.onboarding.periodMonthly, { year, month: getMonthName(month) }));
   const isButtonEnabled = mainGoal.trim().length > 0;
 
   const handleSubmit = () => {
@@ -109,11 +115,11 @@ export function OnboardingModal({
 
             <Animated.View style={[styles.circle, { transform: [{ scale: pressScale }], pointerEvents: 'auto' }]}> 
               <View style={styles.circleTouchable}>
-                <Text style={styles.periodText}>{periodText}에 나는</Text>
+                <Text style={styles.periodText}>{periodText}{t.onboarding.suffix}</Text>
                 <View style={styles.inputWrapper}>
                   <TextInput
                     style={styles.input}
-                    placeholder="'무엇'을 할거야?"
+                    placeholder={t.onboarding.placeholder}
                     placeholderTextColor={MANDALART_COLORS.common.textSecondary}
                     value={mainGoal}
                     onChangeText={setMainGoal}
@@ -128,9 +134,9 @@ export function OnboardingModal({
                       onPress={onClose} 
                       activeOpacity={0.8}
                       accessibilityRole="button"
-                      accessibilityLabel="닫기"
+                      accessibilityLabel={t.common.close}
                     >
-                      <Text style={styles.cancelButtonText}>닫기</Text>
+                      <Text style={styles.cancelButtonText}>{t.common.close}</Text>
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity 
@@ -141,9 +147,9 @@ export function OnboardingModal({
                     activeOpacity={0.9}
                     disabled={!isButtonEnabled}
                     accessibilityRole="button"
-                    accessibilityLabel="시작"
+                    accessibilityLabel={t.onboarding.start}
                   >
-                    <Text style={[styles.buttonText, !isButtonEnabled && styles.buttonTextDisabled]}>시작</Text>
+                    <Text style={[styles.buttonText, !isButtonEnabled && styles.buttonTextDisabled]}>{t.onboarding.start}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -155,7 +161,7 @@ export function OnboardingModal({
   );
 }
 
-const CIRCLE_SIZE = 250;
+const CIRCLE_SIZE = 300;
 
 const styles = StyleSheet.create({
   buttonRow: {

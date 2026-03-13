@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { MandalartData } from '../types/mandalart';
+import { useTranslation } from '../i18n';
 
 interface ExpiryWarningModalProps {
   visible: boolean;
@@ -21,11 +22,15 @@ export function ExpiryWarningModal({
   expiringData,
   onClose,
 }: ExpiryWarningModalProps) {
+  const { t, formatText, getMonthName, language } = useTranslation();
+
   const formatDataInfo = (data: MandalartData) => {
     if (data.period === 'yearly') {
-      return `${data.year}년 연간 목표`;
+      return formatText(t.expiryWarningModal.yearlyGoal, { year: data.year });
     }
-    return `${data.year}년 ${data.month}월 목표`;
+    return language === 'ko'
+      ? formatText(t.expiryWarningModal.monthlyGoal, { year: data.year, month: data.month || 1 })
+      : formatText(t.expiryWarningModal.monthlyGoal, { year: data.year, month: getMonthName(data.month || 1) });
   };
 
   return (
@@ -39,13 +44,12 @@ export function ExpiryWarningModal({
         <View style={styles.modal}>
           <View style={styles.header}>
             <Text style={styles.warningIcon}>⚠️</Text>
-            <Text style={styles.title}>데이터 만료 예정 알림</Text>
+            <Text style={styles.title}>{t.expiryWarningModal.title}</Text>
           </View>
 
           <View style={styles.content}>
             <Text style={styles.description}>
-              아래 데이터가 1개월 후 자동 삭제됩니다.{'\n'}
-              필요한 경우 이미지로 저장해 주세요.
+              {t.expiryWarningModal.description}
             </Text>
 
             <ScrollView style={styles.dataList} showsVerticalScrollIndicator={false}>
@@ -64,7 +68,7 @@ export function ExpiryWarningModal({
             </ScrollView>
 
             <Text style={styles.notice}>
-              💡 설정에서 "이미지로 다운로드하기"를 통해 데이터를 보관하세요.
+              {t.expiryWarningModal.notice}
             </Text>
           </View>
 
@@ -72,9 +76,9 @@ export function ExpiryWarningModal({
             style={styles.closeButton}
             onPress={onClose}
             accessibilityRole="button"
-            accessibilityLabel="확인"
+            accessibilityLabel={t.common.confirm}
           >
-            <Text style={styles.closeButtonText}>확인</Text>
+            <Text style={styles.closeButtonText}>{t.common.confirm}</Text>
           </TouchableOpacity>
         </View>
       </View>

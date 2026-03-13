@@ -29,10 +29,13 @@ import {
   shouldShowExpiryWarning,
   markWarningShown,
 } from '../storage/mandalartStorage';
+import { useTranslation } from '../i18n';
 
 const BACKGROUND_IMAGE_KEY = 'mandalart_background_image';
 
 export function HomeScreen() {
+  const { t, formatText, getMonthName, language } = useTranslation();
+
   // 기간 상태
   const [period, setPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [year, setYear] = useState(new Date().getFullYear());
@@ -256,8 +259,10 @@ export function HomeScreen() {
         <View style={styles.header}>
           <Text style={styles.headerSubtitle}>
             {period === "yearly"
-              ? `${year}년 목표`
-              : `${year}년 ${month}월 목표`}
+              ? formatText(t.homeScreen.yearlyGoal, { year })
+              : (language === 'ko'
+                  ? formatText(t.homeScreen.monthlyGoal, { year, month })
+                  : formatText(t.homeScreen.monthlyGoal, { year, month: getMonthName(month) }))}
           </Text>
           {saving && (
             <View style={styles.savingIndicator}>
@@ -265,7 +270,7 @@ export function HomeScreen() {
                 size="small"
                 color={MANDALART_COLORS.common.success}
               />
-              <Text style={styles.savingText}>저장 중...</Text>
+              <Text style={styles.savingText}>{t.common.saving}</Text>
             </View>
           )}
         </View>
@@ -289,7 +294,7 @@ export function HomeScreen() {
               size="large"
               color={MANDALART_COLORS.common.text}
             />
-            <Text style={styles.loadingText}>불러오는 중...</Text>
+            <Text style={styles.loadingText}>{t.common.loading}</Text>
           </View>
         ) : !shouldShowOnboarding && data ? (
           <ImageBackground
@@ -309,10 +314,10 @@ export function HomeScreen() {
                   style={styles.downloadButton}
                   onPress={handleDownloadImage}
                   accessibilityRole="button"
-                  accessibilityLabel="이미지로 다운로드하기"
+                  accessibilityLabel={t.homeScreen.downloadImage}
                 >
                   <Text style={styles.downloadButtonText}>
-                    📥 이미지로 다운로드하기
+                    {t.homeScreen.downloadImage}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -320,7 +325,7 @@ export function HomeScreen() {
           </ImageBackground>
         ) : !shouldShowOnboarding ? (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>데이터를 불러올 수 없습니다</Text>
+            <Text style={styles.errorText}>{t.common.error}</Text>
           </View>
         ) : (
           <View style={styles.emptyContainer} />

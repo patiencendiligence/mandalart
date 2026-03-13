@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SubGoal } from '../types/mandalart';
 import { MANDALART_COLORS } from '../utils/colors';
+import { useTranslation } from '../i18n';
 
 interface DetailModalProps {
   visible: boolean;
@@ -67,6 +68,7 @@ export function DetailModal({
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const { t, formatText } = useTranslation();
 
   // 반응형 크기 계산
   const modalWidth = Math.min(windowWidth - MODAL_HORIZONTAL_MARGIN, 400);
@@ -158,17 +160,17 @@ export function DetailModal({
           <View style={styles.header}>
             <View style={styles.headerContent}>
               <Text style={styles.headerLabel}>
-                세부목표 {subGoalIndex + 1}
+                {formatText(t.detailModal.subGoalLabel, { index: subGoalIndex + 1 })}
               </Text>
               <Text style={styles.headerTitle}>
-                {subGoal.text || '세부목표를 입력하세요'}
+                {subGoal.text || t.detailModal.subGoalPlaceholder}
               </Text>
             </View>
             <TouchableOpacity 
               onPress={onClose} 
               style={styles.closeButton}
               accessibilityRole="button"
-              accessibilityLabel="닫기"
+              accessibilityLabel={t.common.close}
             >
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
@@ -179,15 +181,15 @@ export function DetailModal({
             contentContainerStyle={styles.contentContainer}
           >
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>실행 계획</Text>
+              <Text style={styles.sectionTitle}>{t.detailModal.actionPlan}</Text>
               {allActionsSaved && !allActionsCompleted && onCompleteAll && (
                 <TouchableOpacity 
                   style={styles.completeAllButton}
                   onPress={() => onCompleteAll(subGoalIndex)}
                   accessibilityRole="button"
-                  accessibilityLabel="전체 완료"
+                  accessibilityLabel={t.detailModal.completeAll}
                 >
-                  <Text style={styles.completeAllButtonText}>전체 완료</Text>
+                  <Text style={styles.completeAllButtonText}>{t.detailModal.completeAll}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -234,7 +236,7 @@ export function DetailModal({
                         >
                           <View style={[styles.cellGlassHighlight, { borderRadius: cellBorderRadius }]} />
                           <Text style={styles.centerCellText}>
-                            {subGoal.text || '세부목표'}
+                            {subGoal.text || t.cell.subGoal}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -326,7 +328,7 @@ export function DetailModal({
                           ]}
                           numberOfLines={3}
                         >
-                          {action?.text || '실행계획 추가'}
+                          {action?.text || t.detailModal.addAction}
                         </Text>
                         {isCompleted && (
                           <View style={styles.checkmark}>
@@ -341,7 +343,7 @@ export function DetailModal({
             </View>
 
             <View style={styles.progressContainer}>
-              <Text style={styles.progressLabel}>진행률</Text>
+              <Text style={styles.progressLabel}>{t.detailModal.progress}</Text>
               <View style={styles.progressBar}>
                 <View
                   style={[

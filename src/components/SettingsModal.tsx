@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { getPastMandalarts, deletePastMandalarts } from '../storage/mandalartStorage';
+import { useI18n, useTranslation, Language } from '../i18n';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -30,6 +31,8 @@ export function SettingsModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pastDataCount, setPastDataCount] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { language, setLanguage } = useI18n();
+  const { t, formatText } = useTranslation();
 
   useEffect(() => {
     if (visible) {
@@ -42,6 +45,10 @@ export function SettingsModal({
     setPastDataCount(pastData.length);
   };
 
+  const handleLanguageChange = useCallback(async (lang: Language) => {
+    await setLanguage(lang);
+  }, [setLanguage]);
+
   const handleDeletePastData = useCallback(() => {
     if (pastDataCount === 0) return;
 
@@ -50,10 +57,11 @@ export function SettingsModal({
       deletePastMandalarts()
         .then((count) => {
           setPastDataCount(0);
+          const message = formatText(t.settingsModal.deleteCompleteMessage, { count });
           if (Platform.OS === 'web') {
-            alert(`${count}개의 지난 데이터가 삭제되었습니다.`);
+            alert(message);
           } else {
-            Alert.alert('삭제 완료', `${count}개의 지난 데이터가 삭제되었습니다.`);
+            Alert.alert(t.settingsModal.deleteComplete, message);
           }
           onDataDeleted?.();
         })
@@ -62,21 +70,23 @@ export function SettingsModal({
         });
     };
 
+    const confirmMessage = formatText(t.settingsModal.deleteConfirmMessage, { count: pastDataCount });
+
     if (Platform.OS === 'web') {
-      if (confirm(`당월 이전의 모든 데이터(${pastDataCount}개)를 삭제하시겠습니까?\n\n삭제된 데이터는 복구할 수 없습니다.`)) {
+      if (confirm(confirmMessage)) {
         confirmDelete();
       }
     } else {
       Alert.alert(
-        '지난 데이터 삭제',
-        `당월 이전의 모든 데이터(${pastDataCount}개)를 삭제하시겠습니까?\n\n삭제된 데이터는 복구할 수 없습니다.`,
+        t.settingsModal.deleteConfirmTitle,
+        confirmMessage,
         [
-          { text: '취소', style: 'cancel' },
-          { text: '삭제', style: 'destructive', onPress: confirmDelete },
+          { text: t.common.cancel, style: 'cancel' },
+          { text: t.common.delete, style: 'destructive', onPress: confirmDelete },
         ]
       );
     }
-  }, [pastDataCount, onDataDeleted]);
+  }, [pastDataCount, onDataDeleted, t, formatText]);
 
   const handleSelectImage = () => {
     if (Platform.OS === 'web') {
@@ -110,21 +120,65 @@ export function SettingsModal({
       <View style={styles.overlay}>
         <View style={styles.modal}>
           <View style={styles.header}>
-            <Text style={styles.title}>설정</Text>
+            <Text style={styles.title}>{t.settingsModal.title}</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={onClose}
               accessibilityRole="button"
-              accessibilityLabel="닫기"
+              accessibilityLabel={t.common.close}
             >
               <Text style={styles.closeText}>×</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.content}>
-            <Text style={styles.sectionTitle}>배경 이미지</Text>
+            {/* 언어 설정 섹션 */}
+            <Text style={styles.sectionTitle}>{t.settingsModal.language}</Text>
             <Text style={styles.sectionDesc}>
-              나만의 배경 이미지를 설정하세요
+              {t.settingsModal.languageDesc}
+            </Text>
+
+            <View style={styles.languageButtonRow}>
+              <TouchableOpacity
+                style={[
+                  styles.languageButton,
+                  language === 'ko' && styles.languageButtonActive,
+                ]}
+                onPress={() => handleLanguageChange('ko')}
+                accessibilityRole="button"
+                accessibilityLabel="한국어"
+              >
+                <Text style={[
+                  styles.languageButtonText,
+                  language === 'ko' && styles.languageButtonTextActive,
+                ]}>
+                  🇰🇷 한국어
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.languageButton,
+                  language === 'en' && styles.languageButtonActive,
+                ]}
+                onPress={() => handleLanguageChange('en')}
+                accessibilityRole="button"
+                accessibilityLabel="English"
+              >
+                <Text style={[
+                  styles.languageButtonText,
+                  language === 'en' && styles.languageButtonTextActive,
+                ]}>
+                  🇺🇸 English
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider} />
+
+            {/* 배경 이미지 섹션 */}
+            <Text style={styles.sectionTitle}>{t.settingsModal.backgroundImage}</Text>
+            <Text style={styles.sectionDesc}>
+              {t.settingsModal.backgroundImageDesc}
             </Text>
 
             {backgroundImage && (
@@ -142,10 +196,10 @@ export function SettingsModal({
                 style={styles.selectButton}
                 onPress={handleSelectImage}
                 accessibilityRole="button"
-                accessibilityLabel="이미지 선택"
+                accessibilityLabel={t.settingsModal.selectImage}
               >
                 <Text style={styles.selectButtonText}>
-                  {backgroundImage ? '이미지 변경' : '이미지 선택'}
+                  {backgroundImage ? t.settingsModal.changeImage : t.settingsModal.selectImage}
                 </Text>
               </TouchableOpacity>
 
@@ -154,9 +208,9 @@ export function SettingsModal({
                   style={styles.removeButton}
                   onPress={handleRemoveImage}
                   accessibilityRole="button"
-                  accessibilityLabel="이미지 제거"
+                  accessibilityLabel={t.settingsModal.removeImage}
                 >
-                  <Text style={styles.removeButtonText}>제거</Text>
+                  <Text style={styles.removeButtonText}>{t.settingsModal.removeImage}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -174,10 +228,9 @@ export function SettingsModal({
             {/* 데이터 관리 섹션 */}
             <View style={styles.divider} />
             
-            <Text style={styles.sectionTitle}>데이터 관리</Text>
+            <Text style={styles.sectionTitle}>{t.settingsModal.dataManagement}</Text>
             <Text style={styles.sectionDesc}>
-              당월 이전의 모든 만다라트 데이터를 삭제합니다.{'\n'}
-              (데이터는 2년 후 자동 삭제됩니다)
+              {t.settingsModal.dataManagementDesc}
             </Text>
 
             <TouchableOpacity
@@ -188,7 +241,7 @@ export function SettingsModal({
               onPress={handleDeletePastData}
               disabled={pastDataCount === 0 || isDeleting}
               accessibilityRole="button"
-              accessibilityLabel="지난 데이터 삭제"
+              accessibilityLabel={t.settingsModal.deletePastData}
             >
               {isDeleting ? (
                 <ActivityIndicator size="small" color="#fff" />
@@ -197,7 +250,7 @@ export function SettingsModal({
                   styles.deleteButtonText,
                   pastDataCount === 0 && styles.deleteButtonTextDisabled,
                 ]}>
-                  🗑️ 지난 데이터 삭제 ({pastDataCount}개)
+                  {formatText(t.settingsModal.deletePastDataButton, { count: pastDataCount })}
                 </Text>
               )}
             </TouchableOpacity>
@@ -282,6 +335,29 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     gap: 10,
+  },
+  languageButtonRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 8,
+  },
+  languageButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  languageButtonActive: {
+    backgroundColor: '#007aff',
+  },
+  languageButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  languageButtonTextActive: {
+    color: '#fff',
   },
   selectButton: {
     flex: 1,

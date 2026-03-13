@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions, ImageBackground } from 'react-native';
 import { MandalartData } from '../types/mandalart';
+import { useTranslation } from '../i18n';
 
 interface MandalartImageExportProps {
   data: MandalartData;
@@ -10,6 +11,7 @@ interface MandalartImageExportProps {
 
 export function MandalartImageExport({ data, onClose, backgroundImage }: MandalartImageExportProps) {
   const { width: windowWidth } = useWindowDimensions();
+  const { t, getMonthName, language } = useTranslation();
   
   // 컨테이너 패딩과 마진을 고려한 가용 너비 계산
   const modalPadding = 16 * 2;
@@ -48,7 +50,10 @@ export function MandalartImageExport({ data, onClose, backgroundImage }: Mandala
       } as any);
 
       const link = document.createElement('a');
-      link.download = `만다라트_${data.year}년_${data.month}월.png`;
+      const filename = language === 'ko' 
+        ? `만다라트_${data.year}년_${data.month}월.png`
+        : `mandalart_${data.year}_${getMonthName(data.month || 1)}.png`;
+      link.download = filename;
       link.href = canvas.toDataURL('image/png', 1.0);
       document.body.appendChild(link);
       link.click();
@@ -193,9 +198,9 @@ export function MandalartImageExport({ data, onClose, backgroundImage }: Mandala
             <View style={[styles.header, { zIndex: 1 }]}>
               <View style={styles.headerLeft}>
                 <Text style={styles.yearText}>{data.year}</Text>
-                <Text style={styles.chartTitle}>만다라트 차트</Text>
+                <Text style={styles.chartTitle}>{t.imageExport.chartTitle}</Text>
                 <Text style={styles.monthText}>
-                  {data.month}월 {data.reflection?.text || ''}
+                  {getMonthName(data.month || 1)} {data.reflection?.text || ''}
                 </Text>
               </View>
               {data.reflection?.emoji && (
@@ -229,10 +234,10 @@ export function MandalartImageExport({ data, onClose, backgroundImage }: Mandala
         {/* Liquid Glass 버튼 영역 */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelButtonText}>취소</Text>
+            <Text style={styles.cancelButtonText}>{t.common.cancel}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.downloadButton} onPress={handleDownload}>
-            <Text style={styles.downloadButtonText}>📥 이미지 저장</Text>
+            <Text style={styles.downloadButtonText}>{t.imageExport.saveImage}</Text>
           </TouchableOpacity>
         </View>
       </View>

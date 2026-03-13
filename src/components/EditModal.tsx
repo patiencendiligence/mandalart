@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SelectedCell, MandalartData } from '../types/mandalart';
 import { MANDALART_COLORS, getSubGoalColor } from '../utils/colors';
+import { useTranslation } from '../i18n';
 
 interface EditModalProps {
   visible: boolean;
@@ -42,6 +43,7 @@ export function EditModal({
   const [isCompleted, setIsCompleted] = useState(false);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const inputRef = useRef<TextInput>(null);
+  const { t, formatText } = useTranslation();
 
   useEffect(() => {
     if (visible && selectedCell && data) {
@@ -113,11 +115,11 @@ export function EditModal({
     if (!selectedCell) return '';
     switch (selectedCell.type) {
       case 'main':
-        return '🎯 최종 목표';
+        return t.editModal.mainGoal;
       case 'subGoal':
-        return `세부목표 ${(selectedCell.subGoalIndex ?? 0) + 1}`;
+        return formatText(t.editModal.subGoal, { index: (selectedCell.subGoalIndex ?? 0) + 1 });
       case 'action':
-        return `✓ 실행계획`;
+        return t.editModal.actionPlan;
       default:
         return '';
     }
@@ -127,11 +129,11 @@ export function EditModal({
     if (!selectedCell) return '';
     switch (selectedCell.type) {
       case 'main':
-        return '달성하고 싶은 최종 목표를 입력하세요';
+        return t.editModal.mainGoalPlaceholder;
       case 'subGoal':
-        return '목표 달성을 위한 세부 계획을 입력하세요';
+        return t.editModal.subGoalPlaceholder;
       case 'action':
-        return '구체적인 실행 계획을 입력하세요';
+        return t.editModal.actionPlaceholder;
       default:
         return '';
     }
@@ -180,7 +182,7 @@ export function EditModal({
               onPress={onClose}
               style={styles.closeButton}
               accessibilityRole="button"
-              accessibilityLabel="닫기"
+              accessibilityLabel={t.common.close}
             >
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
@@ -239,20 +241,20 @@ export function EditModal({
                     ]}
                     onPress={handleSave}
                     accessibilityRole="button"
-                    accessibilityLabel="저장"
+                    accessibilityLabel={t.common.save}
                   >
-                    <Text style={styles.saveButtonText}>저장</Text>
+                    <Text style={styles.saveButtonText}>{t.common.save}</Text>
                   </TouchableOpacity>
                 );
               } else {
                 // 실행계획(action)인 경우에만 완료/완료취소 버튼 표시
                 const isActionType = selectedCell?.type === "action";
                 const completeButtonText = isCompleted
-                  ? "완료취소"
-                  : "실행완료";
+                  ? t.editModal.cancelComplete
+                  : t.editModal.complete;
                 const completeButtonBg = isCompleted
-                  ? "rgba(231, 76, 60, 0.6)" // 빨간색 계열 (완료취소)
-                  : "rgba(39, 174, 96, 0.6)"; // 초록색 계열 (실행완료)
+                  ? "rgba(231, 76, 60, 0.6)"
+                  : "rgba(39, 174, 96, 0.6)";
 
                 return (
                   <View
@@ -272,9 +274,9 @@ export function EditModal({
                       ]}
                       onPress={handleSave}
                       accessibilityRole="button"
-                      accessibilityLabel="수정"
+                      accessibilityLabel={t.common.edit}
                     >
-                      <Text style={styles.saveButtonText}>수정</Text>
+                      <Text style={styles.saveButtonText}>{t.common.edit}</Text>
                     </TouchableOpacity>
                     {isActionType && (
                       <TouchableOpacity
