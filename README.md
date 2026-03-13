@@ -1,5 +1,11 @@
 # 만다라트 (Mandalart) 목표 계획 앱
 
+<p align="center">
+  <img src="./assets/no-plans-meme.png" width="300" alt="No plans yet?"/>
+</p>
+
+<p align="center"><strong>아직 계획이 없다고요? 걱정 마세요!</strong></p>
+
 오타니 쇼헤이의 목표 달성법으로 유명한 **만다라트** 기법을
 활용한 목표 계획 앱입니다.
 
