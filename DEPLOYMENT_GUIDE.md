@@ -185,10 +185,10 @@ Android 위젯은 빌드 시 자동으로 포함됩니다.
   "expo": {
     "version": "1.1.0",  // 앱 버전
     "ios": {
-      "buildNumber": "2"  // iOS 빌드 번호
+      "buildNumber": "1.1.0"  // iOS 빌드 번호
     },
     "android": {
-      "versionCode": 2  // Android 버전 코드
+      "versionCode": "1.1.0"  // Android 버전 코드
     }
   }
 }
