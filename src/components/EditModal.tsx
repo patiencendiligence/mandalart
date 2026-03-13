@@ -8,9 +8,6 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Switch,
-  Animated,
-  Dimensions,
 } from 'react-native';
 import { SelectedCell, MandalartData } from '../types/mandalart';
 import { MANDALART_COLORS, getSubGoalColor } from '../utils/colors';
@@ -27,8 +24,6 @@ interface EditModalProps {
   onToggleComplete: (subGoalIndex: number, actionIndex: number) => void;
 }
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
 export function EditModal({
   visible,
   selectedCell,
@@ -41,7 +36,6 @@ export function EditModal({
 }: EditModalProps) {
   const [text, setText] = useState('');
   const [isCompleted, setIsCompleted] = useState(false);
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const inputRef = useRef<TextInput>(null);
   const { t, formatText } = useTranslation();
 
@@ -62,22 +56,8 @@ export function EditModal({
         setIsCompleted(action.completed);
       }
 
-      // 슬라이드 애니메이션
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 11,
-      }).start();
-
       // 포커스
       setTimeout(() => inputRef.current?.focus(), 300);
-    } else {
-      Animated.timing(slideAnim, {
-        toValue: SCREEN_HEIGHT,
-        duration: 250,
-        useNativeDriver: true,
-      }).start();
     }
   }, [visible, selectedCell, data]);
 
@@ -154,22 +134,18 @@ export function EditModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.overlay}
-      >
+      <View style={styles.overlay}>
         <TouchableOpacity
           style={styles.backdrop}
           onPress={onClose}
           activeOpacity={1}
         />
 
-        <Animated.View
-          style={[
-            styles.modalContainer,
-            { transform: [{ translateY: slideAnim }] },
-          ]}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardAvoid}
         >
+          <View style={styles.modalContainer}>
           <View style={[styles.header, { backgroundColor: colors.bg }]}>
             <Text style={styles.title}>{getTitle()}</Text>
             <TouchableOpacity
@@ -292,8 +268,9 @@ export function EditModal({
               }
             })()}
           </View>
-        </Animated.View>
-      </KeyboardAvoidingView>
+        </View>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }
@@ -301,30 +278,31 @@ export function EditModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-    zIndex: 9999,
-    elevation: 9999,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
+  backdrop: {
+    flex: 1,
+  },
+  keyboardAvoid: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
   modalContainer: {
-    backgroundColor: 'rgba(242, 242, 247, 0.95)',
+    backgroundColor: 'rgba(242, 242, 247, 0.98)',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    minHeight: 300,
-    overflow: 'hidden',
+    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
     // Liquid glass border
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.8)',
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-    borderRightColor: 'rgba(0, 0, 0, 0.08)',
+    borderBottomWidth: 0,
     // Outer shadow
-    shadowColor: 'rgba(0, 0, 0, 0.25)',
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 1,
-    shadowRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
     elevation: 20,
   },
   header: {
