@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "만다라트 - 목표 달성 플래너",
+  "version": "1.0.0",
+  "description": "오타니 쇼헤이의 만다라트 목표 달성법으로 체계적인 목표 관리를 하세요. 월간/연간 목표를 9x9 그리드로 시각화합니다.",
+  "default_locale": "ko",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "만다라트 열기"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

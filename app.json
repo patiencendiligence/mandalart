@@ -5,32 +5,52 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0f0f23"
+      "backgroundColor": "#e8e8e9"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mandalart.app"
+      "bundleIdentifier": "com.mandalart.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "이미지 저장을 위해 사진 라이브러리 접근이 필요합니다",
+        "NSPhotoLibraryAddUsageDescription": "만다라트 이미지를 사진 앱에 저장하기 위해 접근이 필요합니다",
+        "CFBundleDisplayName": "만다라트",
+        "CFBundleLocalizations": ["ko", "en"],
+        "CFBundleDevelopmentRegion": "ko"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0f0f23"
+        "backgroundColor": "#e8e8e9"
       },
-      "package": "com.mandalart.app"
+      "package": "com.mandalart.app",
+      "versionCode": 1,
+      "permissions": []
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "만다라트 - 목표 달성 플래너",
+      "shortName": "만다라트",
+      "description": "오타니 쇼헤이의 만다라트 목표 달성법으로 체계적인 목표 관리를 하세요.",
+      "lang": "ko",
+      "themeColor": "#e8e8e9",
+      "backgroundColor": "#e8e8e9"
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    }
   }
 }
-
