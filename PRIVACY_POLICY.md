@@ -59,7 +59,7 @@
 
 개인정보 처리방침에 대한 문의사항이 있으시면 아래로 연락해 주세요.
 
-- **이메일**: [연락처 이메일 주소]
+- **이메일**: patiencendiligence@gmail.com
 - **앱 이름**: 만다라트 - 목표 달성 플래너
 
 ---
@@ -125,5 +125,5 @@ This Privacy Policy may be updated due to changes in laws, policies, or app feat
 
 If you have questions about this Privacy Policy, please contact us at:
 
-- **Email**: [Your contact email]
+- **Email**: patiencendiligence@gmail.com
 - **App Name**: Mandalart - Goal Achievement Planner
