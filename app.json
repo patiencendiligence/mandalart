@@ -22,9 +22,14 @@
         "NSPhotoLibraryUsageDescription": "이미지 저장을 위해 사진 라이브러리 접근이 필요합니다",
         "NSPhotoLibraryAddUsageDescription": "만다라트 이미지를 사진 앱에 저장하기 위해 접근이 필요합니다",
         "CFBundleDisplayName": "만다라트",
-        "CFBundleLocalizations": ["ko", "en"],
+        "CFBundleLocalizations": [
+          "ko",
+          "en"
+        ],
         "CFBundleDevelopmentRegion": "ko",
-        "NSUserActivityTypes": ["ConfigurationAppIntent"]
+        "NSUserActivityTypes": [
+          "ConfigurationAppIntent"
+        ]
       }
     },
     "android": {
@@ -87,7 +92,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "95db7a3b-fe68-41e4-99ff-7ca6e581ee06"
       }
     }
   }
