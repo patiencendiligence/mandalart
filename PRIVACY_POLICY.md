@@ -1,6 +1,6 @@
 # 개인정보 처리방침
 
-**최종 수정일: 2024년 3월**
+**최종 수정일: 2026년 3월**
 
 ## 1. 개요
 
@@ -9,10 +9,12 @@
 ## 2. 수집하는 개인정보
 
 ### 2.1 자동으로 수집되는 정보
+
 - 앱 사용 기록 (로컬 저장)
 - 기기 유형 및 운영체제 버전
 
 ### 2.2 사용자가 직접 입력하는 정보
+
 - 목표 및 계획 내용
 - 회고 및 메모
 
@@ -40,6 +42,7 @@
 ## 7. 사용자의 권리
 
 사용자는 다음과 같은 권리를 가집니다:
+
 - 저장된 데이터 확인
 - 데이터 삭제 (앱 내 설정에서 가능)
 - 앱 삭제를 통한 모든 데이터 삭제
@@ -72,10 +75,12 @@ Mandalart (the "App") values your privacy and complies with applicable privacy l
 ## 2. Information We Collect
 
 ### 2.1 Automatically Collected Information
+
 - App usage data (stored locally)
 - Device type and operating system version
 
 ### 2.2 Information You Provide
+
 - Goals and plans
 - Reflections and notes
 
@@ -103,6 +108,7 @@ The Mandalart app does not share your personal information with third parties. A
 ## 7. Your Rights
 
 You have the right to:
+
 - View your stored data
 - Delete your data (available in app settings)
 - Delete all data by uninstalling the app
