@@ -144,6 +144,38 @@ eas submit --platform android
 
 ---
 
+## 위젯 기능
+
+### 지원 플랫폼
+- **iOS**: WidgetKit 기반 (Small, Medium, Large 크기 지원)
+- **Android**: App Widget 기반 (2x2, 3x2 크기 지원)
+
+### 위젯 기능
+- 메인 목표 표시
+- 전체 진행률 표시
+- 현재 기간 (연간/월간) 표시
+- 앱 바로가기
+
+### iOS 위젯 설정
+iOS 위젯은 App Groups를 통해 앱과 데이터를 공유합니다.
+
+1. App Store Connect에서 App Groups 활성화:
+   - Identifier: `group.com.mandalart.app`
+2. 위젯 확장 빌드 시 자동으로 포함됨
+
+### Android 위젯 설정
+Android 위젯은 빌드 시 자동으로 포함됩니다.
+
+위젯 크기:
+- `MandalartWidget`: 3x2 셀 (기본)
+- `MandalartWidgetSmall`: 2x2 셀 (소형)
+
+### 위젯 데이터 업데이트
+앱에서 목표나 진행 상황이 변경되면 자동으로 위젯이 업데이트됩니다.
+수동 업데이트가 필요한 경우 앱을 열면 위젯이 갱신됩니다.
+
+---
+
 ## 업데이트 배포
 
 ### 버전 번호 업데이트

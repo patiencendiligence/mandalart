@@ -23,7 +23,8 @@
         "NSPhotoLibraryAddUsageDescription": "만다라트 이미지를 사진 앱에 저장하기 위해 접근이 필요합니다",
         "CFBundleDisplayName": "만다라트",
         "CFBundleLocalizations": ["ko", "en"],
-        "CFBundleDevelopmentRegion": "ko"
+        "CFBundleDevelopmentRegion": "ko",
+        "NSUserActivityTypes": ["ConfigurationAppIntent"]
       }
     },
     "android": {
@@ -45,7 +46,44 @@
       "backgroundColor": "#e8e8e9"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "MandalartWidget",
+              "label": "만다라트",
+              "description": "목표와 진행률을 한눈에 확인하세요",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "previewImage": "./assets/widget-preview.png",
+              "resizeMode": "horizontal|vertical",
+              "widgetFeatures": "reconfigurable",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2
+            },
+            {
+              "name": "MandalartWidgetSmall",
+              "label": "만다라트 (소형)",
+              "description": "목표와 진행률 간단히 확인",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "previewImage": "./assets/widget-preview-small.png",
+              "resizeMode": "none",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2
+            }
+          ]
+        }
+      ],
+      [
+        "react-native-widget-extension",
+        {
+          "frequentUpdates": true,
+          "widgetsFolder": "ios-widgets"
+        }
+      ]
     ],
     "extra": {
       "eas": {
