@@ -168,12 +168,6 @@ export function EditModal({
           style={[
             styles.modalContainer,
             { transform: [{ translateY: slideAnim }] },
-            selectedCell?.type === "subGoal" &&
-            data?.subGoals[selectedCell.subGoalIndex ?? 0]?.actions?.every(
-              (a) => a.completed,
-            )
-              ? styles.blob
-              : null,
           ]}
         >
           <View style={[styles.header, { backgroundColor: colors.bg }]}>
@@ -305,16 +299,6 @@ export function EditModal({
 }
 
 const styles = StyleSheet.create({
-  blob: {
-    borderRadius: 20,
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 8,
-    backgroundColor: 'rgba(187, 187, 188, 0.12)',
-    borderWidth: 0,
-  },
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
