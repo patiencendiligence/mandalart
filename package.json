@@ -12,9 +12,9 @@
     "build:ios": "eas build --platform ios",
     "build:chrome": "./chrome-extension/build.sh",
     "build:web": "expo export --platform web",
-    "build:all": "npm run build:web && eas hosting:deploy dist && eas build --platform android --profile apk",
+    "build:all": "npm run build:web && eas deploy --prod && eas build --platform android --profile apk",
     "deploy": "git add -A && git commit -m \"chore: deploy update\" && git push && npm run build:all",
-    "deploy:web": "git add -A && git commit -m \"chore: deploy web\" && git push && npm run build:web && eas hosting:deploy dist",
+    "deploy:web": "git add -A && git commit -m \"chore: deploy web\" && git push && npm run build:web && eas deploy --prod",
     "deploy:android": "git add -A && git commit -m \"chore: deploy android\" && git push && eas build --platform android --profile apk"
   },
   "keywords": [
