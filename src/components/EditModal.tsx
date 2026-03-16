@@ -208,34 +208,42 @@ export function EditModal({
       : (t.editModal.actionLabel || '실행계획');
     
     return (
-      <ScrollView style={styles.batchScrollView} showsVerticalScrollIndicator={false}>
-        {batchTexts.map((value, index) => (
-          <View key={index} style={styles.batchInputRow}>
-            <Text style={styles.batchInputLabel}>{index + 1}</Text>
-            <TextInput
-              style={styles.batchInput}
-              value={value}
-              onChangeText={(newText) => {
-                const newBatchTexts = [...batchTexts];
-                newBatchTexts[index] = newText;
-                setBatchTexts(newBatchTexts);
-              }}
-              placeholder={`${labelPrefix} ${index + 1}`}
-              placeholderTextColor={MANDALART_COLORS.common.textMuted}
-              maxLength={50}
-              returnKeyType="next"
-            />
-          </View>
-        ))}
-        <TouchableOpacity
-          style={[styles.saveButton, styles.batchSaveButton]}
-          onPress={handleBatchSave}
-          accessibilityRole="button"
-          accessibilityLabel={t.common.save}
+      <View style={styles.batchContainer}>
+        <ScrollView 
+          style={styles.batchScrollView} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.batchScrollContent}
         >
-          <Text style={styles.saveButtonText}>{t.common.save}</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          {batchTexts.map((value, index) => (
+            <View key={index} style={styles.batchInputRow}>
+              <Text style={styles.batchInputLabel}>{index + 1}</Text>
+              <TextInput
+                style={styles.batchInput}
+                value={value}
+                onChangeText={(newText) => {
+                  const newBatchTexts = [...batchTexts];
+                  newBatchTexts[index] = newText;
+                  setBatchTexts(newBatchTexts);
+                }}
+                placeholder={`${labelPrefix} ${index + 1}`}
+                placeholderTextColor={MANDALART_COLORS.common.textMuted}
+                maxLength={50}
+                returnKeyType="next"
+              />
+            </View>
+          ))}
+        </ScrollView>
+        <View style={styles.batchButtonContainer}>
+          <TouchableOpacity
+            style={[styles.saveButton, styles.batchSaveButton]}
+            onPress={handleBatchSave}
+            accessibilityRole="button"
+            accessibilityLabel={t.common.save}
+          >
+            <Text style={styles.saveButtonText}>{t.common.save}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     );
   };
 
@@ -422,7 +430,16 @@ const styles = StyleSheet.create({
     elevation: 20,
   },
   batchModalContainer: {
-    maxHeight: '80%',
+    maxHeight: '70%',
+    ...Platform.select({
+      ios: {
+        paddingBottom: 40,
+      },
+      android: {
+        paddingBottom: 30,
+      },
+      default: {},
+    }),
   },
   header: {
     flexDirection: 'row',
@@ -462,7 +479,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   batchContent: {
-    paddingBottom: 10,
+    paddingBottom: 0,
+    flex: 1,
   },
   input: {
     backgroundColor: 'rgba(240, 240, 242, 0.8)',
@@ -482,8 +500,20 @@ const styles = StyleSheet.create({
     elevation: 2,
     outlineStyle: 'none' as any,
   },
+  batchContainer: {
+    flex: 1,
+    maxHeight: Platform.OS === 'web' ? 500 : undefined,
+  },
   batchScrollView: {
-    maxHeight: 400,
+    flex: 1,
+    maxHeight: Platform.OS === 'web' ? 400 : 350,
+  },
+  batchScrollContent: {
+    paddingBottom: 10,
+  },
+  batchButtonContainer: {
+    paddingTop: 10,
+    paddingBottom: Platform.OS === 'ios' ? 10 : 20,
   },
   batchInputRow: {
     flexDirection: 'row',
@@ -527,8 +557,8 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   batchSaveButton: {
-    marginTop: 16,
-    marginBottom: 10,
+    marginTop: 6,
+    marginBottom: 0,
   },
   saveButtonText: {
     color: '#222',

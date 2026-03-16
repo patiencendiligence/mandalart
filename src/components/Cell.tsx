@@ -8,6 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { LIQUID_GLASS_STYLE } from '../utils/colors';
+import { useTranslation } from '../i18n';
 
 interface CellProps {
   text: string;
@@ -43,6 +44,7 @@ export function Cell({
   mergeLeft = false,
   mergeRight = false,
 }: CellProps) {
+  const { t } = useTranslation();
   const fontSize = Math.max(10, cellSize * 0.18);
   const borderRadius = cellSize * 0.12;
   
@@ -106,6 +108,8 @@ export function Cell({
   const mergedSize = getMergedSize();
 
   // 플랫폼별 스타일
+  const isAndroid = Platform.OS === 'android';
+  
   const platformStyle = Platform.select({
     web: {
       backdropFilter: 'blur(6px)',
@@ -116,17 +120,15 @@ export function Cell({
       borderRightColor: glassStyle.borderRightColor,
     },
     android: {
-      // Android에서는 개별 border 색상이 지원되지 않으므로 단일 색상 사용
-      borderColor: completed ? 'rgba(200, 200, 200, 0.5)' : 'rgba(255, 255, 255, 0.4)',
-      // Android shadow
-      elevation: completed ? 0 : 3,
+      // Android: 심플한 스타일로 깔끔하게
+      borderWidth: 0,
+      elevation: completed ? 0 : 2,
     },
     ios: {
       borderTopColor: glassStyle.borderTopColor,
       borderLeftColor: glassStyle.borderLeftColor,
       borderBottomColor: glassStyle.borderBottomColor,
       borderRightColor: glassStyle.borderRightColor,
-      // iOS shadow
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: completed ? 0 : 0.1,
@@ -135,13 +137,18 @@ export function Cell({
     default: {},
   });
 
+  // Android용 배경색 (더 불투명하게)
+  const androidBgColor = completed 
+    ? 'rgba(200, 215, 235, 0.7)' 
+    : 'rgba(255, 255, 255, 0.85)';
+
   const dynamicStyles = {
     cell: {
       ...mergedSize,
-      backgroundColor: glassStyle.backgroundColor,
-      borderWidth: glassStyle.borderWidth,
+      backgroundColor: isAndroid ? androidBgColor : glassStyle.backgroundColor,
+      borderWidth: isAndroid ? 0 : glassStyle.borderWidth,
       ...mergedRadius,
-      ...mergedBorderWidths,
+      ...(isAndroid ? {} : mergedBorderWidths),
       ...mergedMargins,
       ...platformStyle,
     },
@@ -177,7 +184,7 @@ export function Cell({
         numberOfLines={3}
         ellipsizeMode="tail"
       >
-        {text || (isCenter ? '목표' : '+')}
+        {text || (isCenter ? (t.cell?.emptyGoal || '목표는?') : '+')}
       </Text>
       
       {completed && (

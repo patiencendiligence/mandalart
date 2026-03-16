@@ -254,14 +254,28 @@ const styles = StyleSheet.create({
   glassBackground: {
     position: "absolute",
     borderRadius: 20,
-    backgroundColor: "rgba(187, 187, 188, 0.12)",
     borderWidth: 0,
-    shadowColor: "rgba(0, 0, 0, 0.1)",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 8,
     overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        backgroundColor: "rgba(187, 187, 188, 0.12)",
+        shadowColor: "rgba(0, 0, 0, 0.1)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 16,
+      },
+      android: {
+        backgroundColor: "rgba(230, 230, 232, 0.95)",
+        elevation: 4,
+      },
+      default: {
+        backgroundColor: "rgba(187, 187, 188, 0.12)",
+        shadowColor: "rgba(0, 0, 0, 0.1)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 16,
+      },
+    }),
   },
   glassHighlight: {
     display: "none",

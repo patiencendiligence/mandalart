@@ -236,7 +236,8 @@ export function DetailModal({
                       const extraWidth = (mergeInfo.mergeLeft ? baseMargin : 0) + (mergeInfo.mergeRight ? baseMargin : 0);
                       const extraHeight = (mergeInfo.mergeTop ? baseMargin : 0) + (mergeInfo.mergeBottom ? baseMargin : 0);
                       
-                      // Inset 효과: 위/왼쪽에 어두운 border, 아래/오른쪽에 밝은 border
+                      const isAndroid = Platform.OS === 'android';
+                      
                       mergeStyles = {
                         width: cellSize + extraWidth,
                         height: cellSize + extraHeight,
@@ -244,25 +245,26 @@ export function DetailModal({
                         borderTopRightRadius: (mergeInfo.mergeTop || mergeInfo.mergeRight) ? 0 : cellBorderRadius,
                         borderBottomLeftRadius: (mergeInfo.mergeBottom || mergeInfo.mergeLeft) ? 0 : cellBorderRadius,
                         borderBottomRightRadius: (mergeInfo.mergeBottom || mergeInfo.mergeRight) ? 0 : cellBorderRadius,
-                        // Inset border - 연결되지 않은 방향만 표시
-                        borderTopWidth: mergeInfo.mergeTop ? 0 : 1.5,
-                        borderBottomWidth: mergeInfo.mergeBottom ? 0 : 1.5,
-                        borderLeftWidth: mergeInfo.mergeLeft ? 0 : 1.5,
-                        borderRightWidth: mergeInfo.mergeRight ? 0 : 1.5,
-                        // Inset 효과: 위/왼쪽 어둡게, 아래/오른쪽 밝게 (눌린 느낌)
-                        borderTopColor: 'rgba(0, 0, 0, 0.12)',
-                        borderLeftColor: 'rgba(0, 0, 0, 0.1)',
-                        borderBottomColor: 'rgba(255, 255, 255, 0.8)',
-                        borderRightColor: 'rgba(255, 255, 255, 0.7)',
                         marginTop: mergeInfo.mergeTop ? 0 : baseMargin,
                         marginBottom: mergeInfo.mergeBottom ? 0 : baseMargin,
                         marginLeft: mergeInfo.mergeLeft ? 0 : baseMargin,
                         marginRight: mergeInfo.mergeRight ? 0 : baseMargin,
-                        // Inset 반투명 배경색
-                        backgroundColor: 'rgba(180, 200, 230, 0.4)',
-                        // 외부 shadow 제거
-                        shadowOpacity: 0,
+                        backgroundColor: isAndroid ? 'rgba(200, 215, 235, 0.7)' : 'rgba(180, 200, 230, 0.4)',
                         elevation: 0,
+                        shadowOpacity: 0,
+                        // 안드로이드는 border 제거
+                        ...(isAndroid ? {
+                          borderWidth: 0,
+                        } : {
+                          borderTopWidth: mergeInfo.mergeTop ? 0 : 1.5,
+                          borderBottomWidth: mergeInfo.mergeBottom ? 0 : 1.5,
+                          borderLeftWidth: mergeInfo.mergeLeft ? 0 : 1.5,
+                          borderRightWidth: mergeInfo.mergeRight ? 0 : 1.5,
+                          borderTopColor: 'rgba(0, 0, 0, 0.12)',
+                          borderLeftColor: 'rgba(0, 0, 0, 0.1)',
+                          borderBottomColor: 'rgba(255, 255, 255, 0.8)',
+                          borderRightColor: 'rgba(255, 255, 255, 0.7)',
+                        }),
                       };
                     } else {
                       mergeStyles = {
@@ -343,23 +345,29 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   modalContainer: {
-    backgroundColor: 'rgba(242, 242, 247, 0.98)',
     borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.6)',
     zIndex: 1,
     minHeight: 450,
     ...Platform.select({
       ios: {
+        backgroundColor: 'rgba(242, 242, 247, 0.98)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255, 255, 255, 0.6)',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
         shadowRadius: 12,
       },
       android: {
+        backgroundColor: '#f2f2f7',
+        borderWidth: 0,
         elevation: 8,
       },
-      default: {},
+      default: {
+        backgroundColor: 'rgba(242, 242, 247, 0.98)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255, 255, 255, 0.6)',
+      },
     }),
   },
   glassHighlight: {
@@ -477,12 +485,12 @@ const styles = StyleSheet.create({
   centerCell: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     padding: 12,
     overflow: 'hidden',
-    borderWidth: 1,
     ...Platform.select({
       ios: {
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        borderWidth: 1,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -493,10 +501,13 @@ const styles = StyleSheet.create({
         borderRightColor: 'rgba(0, 0, 0, 0.05)',
       },
       android: {
-        elevation: 3,
-        borderColor: 'rgba(255, 255, 255, 0.4)',
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        borderWidth: 0,
+        elevation: 2,
       },
       default: {
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        borderWidth: 1,
         borderTopColor: 'rgba(255, 255, 255, 0.7)',
         borderLeftColor: 'rgba(255, 255, 255, 0.6)',
         borderBottomColor: 'rgba(0, 0, 0, 0.08)',
@@ -516,13 +527,13 @@ const styles = StyleSheet.create({
   actionCell: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     padding: 10,
     position: 'relative',
     overflow: 'hidden',
-    borderWidth: 1,
     ...Platform.select({
       ios: {
+        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+        borderWidth: 1,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -533,10 +544,13 @@ const styles = StyleSheet.create({
         borderRightColor: 'rgba(0, 0, 0, 0.06)',
       },
       android: {
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        borderWidth: 0,
         elevation: 2,
-        borderColor: 'rgba(255, 255, 255, 0.4)',
       },
       default: {
+        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+        borderWidth: 1,
         borderTopColor: 'rgba(255, 255, 255, 0.7)',
         borderLeftColor: 'rgba(255, 255, 255, 0.6)',
         borderBottomColor: 'rgba(0, 0, 0, 0.08)',
@@ -545,9 +559,9 @@ const styles = StyleSheet.create({
     }),
   },
   actionCellCompleted: {
-    backgroundColor: 'rgba(180, 200, 230, 0.4)',
     ...Platform.select({
       ios: {
+        backgroundColor: 'rgba(180, 200, 230, 0.4)',
         shadowOpacity: 0,
         borderTopColor: 'rgba(0, 0, 0, 0.15)',
         borderLeftColor: 'rgba(0, 0, 0, 0.1)',
@@ -555,10 +569,11 @@ const styles = StyleSheet.create({
         borderRightColor: 'rgba(255, 255, 255, 0.7)',
       },
       android: {
+        backgroundColor: 'rgba(200, 215, 235, 0.7)',
         elevation: 0,
-        borderColor: 'rgba(200, 200, 200, 0.5)',
       },
       default: {
+        backgroundColor: 'rgba(180, 200, 230, 0.4)',
         borderTopColor: 'rgba(0, 0, 0, 0.15)',
         borderLeftColor: 'rgba(0, 0, 0, 0.1)',
         borderBottomColor: 'rgba(255, 255, 255, 0.8)',

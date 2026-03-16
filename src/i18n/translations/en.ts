@@ -139,5 +139,6 @@ export const en: TranslationKeys = {
     actionPlan: 'Action',
     notEntered: 'Empty',
     completed: 'Done',
+    emptyGoal: 'Your goal?',
   },
 };
