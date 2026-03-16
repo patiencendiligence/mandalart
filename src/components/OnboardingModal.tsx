@@ -33,6 +33,8 @@ export function OnboardingModal({
 }: OnboardingModalProps) {
   const [mainGoal, setMainGoal] = useState('');
   const pressScale = useRef(new Animated.Value(1)).current;
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+  const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
   const { t, formatText, getMonthName, language } = useTranslation();
 
   const RIPPLE_COUNT = 3;
@@ -47,9 +49,12 @@ export function OnboardingModal({
       rippleLoopsRef.current.forEach((l) => l && l.stop());
       rippleTimersRef.current.forEach((t) => t && clearTimeout(t));
       rippleAnimsRef.current.forEach((v) => v.setValue(0));
+      pulseLoopRef.current?.stop();
+      pulseAnim.setValue(0);
       return;
     }
 
+    // Ripple 애니메이션
     rippleAnimsRef.current.forEach((anim, i) => {
       anim.setValue(0);
       const loop = Animated.loop(
@@ -67,9 +72,31 @@ export function OnboardingModal({
       rippleTimersRef.current[i] = timer;
     });
 
+    // Circle 펄스 애니메이션
+    pulseAnim.setValue(0);
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 1200,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulseLoopRef.current = pulseLoop;
+    pulseLoop.start();
+
     return () => {
       rippleLoopsRef.current.forEach((l) => l && l.stop());
       rippleTimersRef.current.forEach((t) => t && clearTimeout(t));
+      pulseLoopRef.current?.stop();
     };
   }, [visible]);
 
@@ -113,7 +140,18 @@ export function OnboardingModal({
               />
             ))}
 
-            <Animated.View style={[styles.circle, { transform: [{ scale: pressScale }], pointerEvents: 'auto' }]}> 
+            <Animated.View style={[
+              styles.circle, 
+              { 
+                transform: [
+                  { scale: Animated.multiply(pressScale, pulseAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 1.03],
+                  })) }
+                ], 
+                pointerEvents: 'auto' 
+              }
+            ]}> 
               <View style={styles.circleTouchable}>
                 <Text style={styles.periodText}>{periodText}{t.onboarding.suffix}</Text>
                 <View style={styles.inputWrapper}>
