@@ -48,7 +48,9 @@ export function HomeScreen() {
     saving,
     updateMainGoal,
     updateSubGoal,
+    updateAllSubGoals,
     updateAction,
+    updateAllActions,
     toggleActionComplete,
     completeAllActions,
     saveReflection,
@@ -220,6 +222,16 @@ export function HomeScreen() {
     await completeAllActions(subGoalIndex);
   }, [completeAllActions]);
 
+  // 세부목표 한번에 저장
+  const handleSaveAllSubGoals = useCallback(async (texts: string[]) => {
+    await updateAllSubGoals(texts);
+  }, [updateAllSubGoals]);
+
+  // 실행계획 한번에 저장
+  const handleSaveAllActions = useCallback(async (subGoalIndex: number, texts: string[]) => {
+    await updateAllActions(subGoalIndex, texts);
+  }, [updateAllActions]);
+
   // 회고 저장 핸들러
   const handleSaveReflection = useCallback(async (reflection: Reflection) => {
     await saveReflection(reflection);
@@ -357,6 +369,8 @@ export function HomeScreen() {
           onSaveSubGoal={handleSaveSubGoal}
           onSaveAction={handleSaveAction}
           onToggleComplete={handleToggleComplete}
+          onSaveAllSubGoals={handleSaveAllSubGoals}
+          onSaveAllActions={handleSaveAllActions}
         />
 
         {/* 축하 모달 - 모든 목표 완료 시 */}

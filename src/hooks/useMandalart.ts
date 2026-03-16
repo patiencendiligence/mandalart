@@ -67,6 +67,48 @@ export function useMandalart(period: 'monthly' | 'yearly', year: number, month?:
     }
   }, [data]);
 
+  // 모든 세부목표 한번에 업데이트
+  const updateAllSubGoals = useCallback(async (texts: string[]) => {
+    if (!data) return;
+    
+    const updatedSubGoals = data.subGoals.map((sg, index) => ({
+      ...sg,
+      text: texts[index]?.trim() || sg.text,
+    }));
+    
+    const updated = { ...data, subGoals: updatedSubGoals };
+    setData(updated);
+    
+    setSaving(true);
+    try {
+      await saveMandalart(updated);
+    } finally {
+      setSaving(false);
+    }
+  }, [data]);
+
+  // 특정 세부목표의 모든 실행계획 한번에 업데이트
+  const updateAllActions = useCallback(async (subGoalIndex: number, texts: string[]) => {
+    if (!data) return;
+    
+    const updatedSubGoals = [...data.subGoals];
+    const updatedActions = updatedSubGoals[subGoalIndex].actions.map((action, index) => ({
+      ...action,
+      text: texts[index]?.trim() || action.text,
+    }));
+    updatedSubGoals[subGoalIndex] = { ...updatedSubGoals[subGoalIndex], actions: updatedActions };
+    
+    const updated = { ...data, subGoals: updatedSubGoals };
+    setData(updated);
+    
+    setSaving(true);
+    try {
+      await saveMandalart(updated);
+    } finally {
+      setSaving(false);
+    }
+  }, [data]);
+
   // 액션 아이템 업데이트
   const updateAction = useCallback(async (
     subGoalIndex: number,
@@ -142,7 +184,9 @@ export function useMandalart(period: 'monthly' | 'yearly', year: number, month?:
     saving,
     updateMainGoal,
     updateSubGoal,
+    updateAllSubGoals,
     updateAction,
+    updateAllActions,
     toggleActionComplete,
     completeAllActions,
     saveReflection,

@@ -43,6 +43,10 @@ export const en: TranslationKeys = {
     actionPlaceholder: 'Enter a specific action plan',
     cancelComplete: 'Undo',
     complete: 'Complete',
+    batchSubGoals: '📝 Sub-goals to achieve {{mainGoal}}',
+    batchActions: '📝 Actions to achieve {{subGoal}}',
+    subGoalLabel: 'Sub-goal',
+    actionLabel: 'Action',
   },
   
   detailModal: {

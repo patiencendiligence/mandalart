@@ -42,6 +42,10 @@ export const ko = {
     actionPlaceholder: '구체적인 실행 계획을 입력하세요',
     cancelComplete: '완료취소',
     complete: '실행완료',
+    batchSubGoals: '📝 {{mainGoal}}를 이루기 위한 세부목표들',
+    batchActions: '📝 {{subGoal}}을 이루기 위한 실행계획들',
+    subGoalLabel: '세부목표',
+    actionLabel: '실행계획',
   },
   
   detailModal: {
