@@ -170,7 +170,7 @@ export function OnboardingModal({
                     <TouchableOpacity 
                       style={styles.cancelButton} 
                       onPress={onClose} 
-                      activeOpacity={0.8}
+                      activeOpacity={0.5}
                       accessibilityRole="button"
                       accessibilityLabel={t.common.close}
                     >
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 99,
     // Liquid glass 스타일 (어두운 버전)
-    backgroundColor: 'rgba(160, 160, 165, 0.5)',
+    backgroundColor: 'rgba(188, 188, 193, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 1,
   },
   cancelButtonText: {
     color: '#444',
@@ -330,31 +330,32 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     borderRadius: 99,
-    // Liquid glass 스타일
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.8)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.7)',
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-    borderRightColor: 'rgba(0, 0, 0, 0.08)',
-    shadowColor: 'rgba(0, 0, 0, 0.12)',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 4,
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.95)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+    borderRightColor: 'rgba(255, 255, 255, 0.4)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 8,
   },
   buttonDisabled: { 
     opacity: 0.5,
-    backgroundColor: 'rgba(200, 200, 205, 0.4)',
+    backgroundColor: 'rgba(200, 200, 205, 0.2)',
   },
   buttonText: {
-    color: '#333',
-    fontSize: 12,
+    color: '#222',
+    fontSize: 13,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
   buttonTextDisabled: { 
     opacity: 0.6,

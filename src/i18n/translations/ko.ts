@@ -23,6 +23,8 @@ export const ko = {
     yearlyGoal: '{{year}}년 목표',
     monthlyGoal: '{{year}}년 {{month}}월 목표',
     downloadImage: '📥 이미지로 다운로드하기',
+    mainGoalRequired: '최종목표 필요',
+    mainGoalRequiredMessage: '먼저 최종목표를 입력해주세요.',
   },
   
   onboarding: {

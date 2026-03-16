@@ -24,6 +24,8 @@ export const en: TranslationKeys = {
     yearlyGoal: '{{year}} Goals',
     monthlyGoal: '{{month}} {{year}} Goals',
     downloadImage: '📥 Download as Image',
+    mainGoalRequired: 'Main Goal Required',
+    mainGoalRequiredMessage: 'Please enter your main goal first.',
   },
   
   onboarding: {

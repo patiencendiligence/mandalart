@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   Platform,
+  Alert,
 } from 'react-native';
 import { MandalartGrid } from '../components/MandalartGrid';
 import { EditModal } from '../components/EditModal';
@@ -154,15 +155,37 @@ export function HomeScreen() {
     subGoalIndex: number,
     actionIndex?: number
   ) => {
+    // 최종목표가 없는데 세부목표/실행계획 셀 클릭 시 경고
+    if (type !== 'main' && !data?.mainGoal?.trim()) {
+      const title = t.homeScreen.mainGoalRequired || '최종목표 필요';
+      const message = t.homeScreen.mainGoalRequiredMessage || '먼저 최종목표를 입력해주세요.';
+      if (Platform.OS === 'web') {
+        window.alert(`${title}\n\n${message}`);
+      } else {
+        Alert.alert(title, message, [{ text: t.common.confirm || '확인' }]);
+      }
+      return;
+    }
     setSelectedCell({ type, subGoalIndex, actionIndex });
     setEditModalVisible(true);
-  }, []);
+  }, [data?.mainGoal, t]);
 
   // 세부목표 그리드 클릭 핸들러 (줌인)
   const handleSubGoalGridPress = useCallback((subGoalIndex: number) => {
+    // 최종목표가 없으면 경고
+    if (!data?.mainGoal?.trim()) {
+      const title = t.homeScreen.mainGoalRequired || '최종목표 필요';
+      const message = t.homeScreen.mainGoalRequiredMessage || '먼저 최종목표를 입력해주세요.';
+      if (Platform.OS === 'web') {
+        window.alert(`${title}\n\n${message}`);
+      } else {
+        Alert.alert(title, message, [{ text: t.common.confirm || '확인' }]);
+      }
+      return;
+    }
     setSelectedSubGoalIndex(subGoalIndex);
     setDetailModalVisible(true);
-  }, []);
+  }, [data?.mainGoal, t]);
 
   // EditModal이 DetailModal에서 열렸는지 추적
   const [openedFromDetail, setOpenedFromDetail] = useState(false);
