@@ -120,9 +120,9 @@ export function Cell({
       borderRightColor: glassStyle.borderRightColor,
     },
     android: {
-      // Android: 심플한 스타일로 깔끔하게
+      // Android: 심플한 스타일로 깔끔하게 (elevation 제거)
       borderWidth: 0,
-      elevation: completed ? 0 : 2,
+      elevation: 0,
     },
     ios: {
       borderTopColor: glassStyle.borderTopColor,

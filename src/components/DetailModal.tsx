@@ -501,9 +501,9 @@ const styles = StyleSheet.create({
         borderRightColor: 'rgba(0, 0, 0, 0.05)',
       },
       android: {
-        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         borderWidth: 0,
-        elevation: 2,
+        elevation: 0,
       },
       default: {
         backgroundColor: 'rgba(255, 255, 255, 0.3)',
@@ -544,9 +544,9 @@ const styles = StyleSheet.create({
         borderRightColor: 'rgba(0, 0, 0, 0.06)',
       },
       android: {
-        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         borderWidth: 0,
-        elevation: 2,
+        elevation: 0,
       },
       default: {
         backgroundColor: 'rgba(255, 255, 255, 0.25)',

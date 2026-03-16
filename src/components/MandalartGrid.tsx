@@ -265,8 +265,8 @@ const styles = StyleSheet.create({
         shadowRadius: 16,
       },
       android: {
-        backgroundColor: "rgba(230, 230, 232, 0.95)",
-        elevation: 4,
+        backgroundColor: "rgba(235, 235, 237, 0.98)",
+        elevation: 0,
       },
       default: {
         backgroundColor: "rgba(187, 187, 188, 0.12)",
