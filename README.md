@@ -121,6 +121,16 @@ mandalart/
 - **React Native Gesture Handler**
 - **React Native Reanimated**
 
+
+---
+
+## Support
+
+이 앱이 도움이 됐다면, 커피 한 잔으로 응원해주세요! [Ko-fi](https://ko-fi.com/H2H61W7DT8)! ☕
+
+---
+
+
 ## 📄 라이선스
 
 MIT License
@@ -248,6 +258,16 @@ mandalart/
 - **AsyncStorage** (local data storage)
 - **React Native Gesture Handler**
 - **React Native Reanimated**
+
+
+---
+
+## Support
+
+If you enjoy this app, consider supporting me on [Ko-fi](https://ko-fi.com/H2H61W7DT8)! ☕
+
+---
+
 
 ## 📄 License
 
