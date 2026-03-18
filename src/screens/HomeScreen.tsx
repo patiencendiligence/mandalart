@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   ImageBackground,
   Platform,
-  Alert,
 } from 'react-native';
 import { MandalartGrid } from '../components/MandalartGrid';
 import { EditModal } from '../components/EditModal';
@@ -21,6 +20,7 @@ import { CelebrationModal } from '../components/CelebrationModal';
 import { MandalartImageExport } from '../components/MandalartImageExport';
 import { SettingsModal } from '../components/SettingsModal';
 import { ExpiryWarningModal } from '../components/ExpiryWarningModal';
+import { AlertModal } from '../components/AlertModal';
 import { useMandalart } from '../hooks/useMandalart';
 import { SelectedCell, Reflection, MandalartData } from '../types/mandalart';
 import { MANDALART_COLORS } from '../utils/colors';
@@ -74,6 +74,9 @@ export function HomeScreen() {
   // 만료 경고 모달 상태
   const [expiryWarningVisible, setExpiryWarningVisible] = useState(false);
   const [expiringData, setExpiringData] = useState<MandalartData[]>([]);
+
+  // 커스텀 알림 모달 상태
+  const [alertModalVisible, setAlertModalVisible] = useState(false);
 
   // 배경 이미지 로드/저장
   useEffect(() => {
@@ -157,35 +160,23 @@ export function HomeScreen() {
   ) => {
     // 최종목표가 없는데 세부목표/실행계획 셀 클릭 시 경고
     if (type !== 'main' && !data?.mainGoal?.trim()) {
-      const title = t.homeScreen.mainGoalRequired || '최종목표 필요';
-      const message = t.homeScreen.mainGoalRequiredMessage || '먼저 최종목표를 입력해주세요.';
-      if (Platform.OS === 'web') {
-        window.alert(`${title}\n\n${message}`);
-      } else {
-        Alert.alert(title, message, [{ text: t.common.confirm || '확인' }]);
-      }
+      setAlertModalVisible(true);
       return;
     }
     setSelectedCell({ type, subGoalIndex, actionIndex });
     setEditModalVisible(true);
-  }, [data?.mainGoal, t]);
+  }, [data?.mainGoal]);
 
   // 세부목표 그리드 클릭 핸들러 (줌인)
   const handleSubGoalGridPress = useCallback((subGoalIndex: number) => {
     // 최종목표가 없으면 경고
     if (!data?.mainGoal?.trim()) {
-      const title = t.homeScreen.mainGoalRequired || '최종목표 필요';
-      const message = t.homeScreen.mainGoalRequiredMessage || '먼저 최종목표를 입력해주세요.';
-      if (Platform.OS === 'web') {
-        window.alert(`${title}\n\n${message}`);
-      } else {
-        Alert.alert(title, message, [{ text: t.common.confirm || '확인' }]);
-      }
+      setAlertModalVisible(true);
       return;
     }
     setSelectedSubGoalIndex(subGoalIndex);
     setDetailModalVisible(true);
-  }, [data?.mainGoal, t]);
+  }, [data?.mainGoal]);
 
   // EditModal이 DetailModal에서 열렸는지 추적
   const [openedFromDetail, setOpenedFromDetail] = useState(false);
@@ -429,6 +420,15 @@ export function HomeScreen() {
           visible={expiryWarningVisible}
           expiringData={expiringData}
           onClose={handleCloseExpiryWarning}
+        />
+
+        {/* 최종목표 필요 알림 모달 */}
+        <AlertModal
+          visible={alertModalVisible}
+          title={t.homeScreen.mainGoalRequired || '최종목표 필요'}
+          message={t.homeScreen.mainGoalRequiredMessage || '먼저 최종목표를 입력해주세요.'}
+          buttons={[{ text: t.common.confirm || '확인', style: 'default' }]}
+          onClose={() => setAlertModalVisible(false)}
         />
       </SafeAreaView>
     </>

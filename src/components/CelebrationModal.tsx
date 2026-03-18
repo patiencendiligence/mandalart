@@ -271,13 +271,24 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     width: '100%',
-    height: 48,
-    backgroundColor: '#34c759',
+    height: 52,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: 99,
-    borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 12,
+    // Liquid glass border
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.95)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+    borderRightColor: 'rgba(255, 255, 255, 0.4)',
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   saveButtonDisabled: {
     backgroundColor: 'rgba(187, 187, 188, 0.2)',
@@ -285,7 +296,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#ffffff',
+    color: '#222',
   },
   saveButtonTextDisabled: {
     color: 'rgba(100, 110, 120, 0.6)',

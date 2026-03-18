@@ -49,6 +49,7 @@ export const en: TranslationKeys = {
     batchActions: '📝 Actions to achieve {{subGoal}}',
     subGoalLabel: 'Sub-goal',
     actionLabel: 'Action',
+    fillRequired: 'Please fill in',
   },
   
   detailModal: {

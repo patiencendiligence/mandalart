@@ -7,12 +7,12 @@ import {
   StyleSheet,
   Platform,
   Image,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { getPastMandalarts, deletePastMandalarts } from '../storage/mandalartStorage';
 import { useI18n, useTranslation, Language } from '../i18n';
+import { AlertModal } from './AlertModal';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -34,6 +34,12 @@ export function SettingsModal({
   const [isDeleting, setIsDeleting] = useState(false);
   const { language, setLanguage } = useI18n();
   const { t, formatText } = useTranslation();
+  
+  // Alert modal states
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [permissionModalVisible, setPermissionModalVisible] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -52,42 +58,24 @@ export function SettingsModal({
 
   const handleDeletePastData = useCallback(() => {
     if (pastDataCount === 0) return;
+    setConfirmModalVisible(true);
+  }, [pastDataCount]);
 
-    const confirmDelete = () => {
-      setIsDeleting(true);
-      deletePastMandalarts()
-        .then((count) => {
-          setPastDataCount(0);
-          const message = formatText(t.settingsModal.deleteCompleteMessage, { count });
-          if (Platform.OS === 'web') {
-            alert(message);
-          } else {
-            Alert.alert(t.settingsModal.deleteComplete, message);
-          }
-          onDataDeleted?.();
-        })
-        .finally(() => {
-          setIsDeleting(false);
-        });
-    };
-
-    const confirmMessage = formatText(t.settingsModal.deleteConfirmMessage, { count: pastDataCount });
-
-    if (Platform.OS === 'web') {
-      if (confirm(confirmMessage)) {
-        confirmDelete();
-      }
-    } else {
-      Alert.alert(
-        t.settingsModal.deleteConfirmTitle,
-        confirmMessage,
-        [
-          { text: t.common.cancel, style: 'cancel' },
-          { text: t.common.delete, style: 'destructive', onPress: confirmDelete },
-        ]
-      );
-    }
-  }, [pastDataCount, onDataDeleted, t, formatText]);
+  const confirmDelete = useCallback(() => {
+    setConfirmModalVisible(false);
+    setIsDeleting(true);
+    deletePastMandalarts()
+      .then((count) => {
+        setPastDataCount(0);
+        const message = formatText(t.settingsModal.deleteCompleteMessage, { count });
+        setSuccessMessage(message);
+        setSuccessModalVisible(true);
+        onDataDeleted?.();
+      })
+      .finally(() => {
+        setIsDeleting(false);
+      });
+  }, [t, formatText, onDataDeleted]);
 
   const handleSelectImage = async () => {
     if (Platform.OS === 'web') {
@@ -97,12 +85,7 @@ export function SettingsModal({
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (status !== 'granted') {
-        Alert.alert(
-          t.settingsModal.permissionRequired || "권한 필요",
-          t.settingsModal.permissionMessage ||
-            "이미지를 선택하려면 갤러리 접근 권한이 필요합니다.",
-          [{ text: t.common.confirm || "확인" }],
-        );
+        setPermissionModalVisible(true);
         return;
       }
 
@@ -136,6 +119,7 @@ export function SettingsModal({
   };
 
   return (
+    <>
     <Modal
       visible={visible}
       transparent
@@ -283,27 +267,64 @@ export function SettingsModal({
         </View>
       </View>
     </Modal>
+
+    {/* 삭제 확인 모달 */}
+    <AlertModal
+      visible={confirmModalVisible}
+      title={t.settingsModal.deleteConfirmTitle || '데이터 삭제'}
+      message={formatText(t.settingsModal.deleteConfirmMessage, { count: pastDataCount })}
+      buttons={[
+        { text: t.common.cancel || '취소', style: 'cancel' },
+        { text: t.common.delete || '삭제', style: 'default', onPress: confirmDelete },
+      ]}
+      onClose={() => setConfirmModalVisible(false)}
+    />
+
+    {/* 삭제 완료 모달 */}
+    <AlertModal
+      visible={successModalVisible}
+      title={t.settingsModal.deleteComplete || '삭제 완료'}
+      message={successMessage}
+      buttons={[{ text: t.common.confirm || '확인', style: 'default' }]}
+      onClose={() => setSuccessModalVisible(false)}
+    />
+
+    {/* 권한 필요 모달 */}
+    <AlertModal
+      visible={permissionModalVisible}
+      title={t.settingsModal.permissionRequired || '권한 필요'}
+      message={t.settingsModal.permissionMessage || '이미지를 선택하려면 갤러리 접근 권한이 필요합니다.'}
+      buttons={[{ text: t.common.confirm || '확인', style: 'default' }]}
+      onClose={() => setPermissionModalVisible(false)}
+    />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modal: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.78)',
+    borderRadius: 24,
     width: '90%',
     maxWidth: 360,
     overflow: 'hidden',
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: 6 },
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    borderRightColor: 'rgba(0, 0, 0, 0.05)',
+    // Shadow
+    shadowColor: 'rgba(0, 0, 0, 0.25)',
+    shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 1,
-    shadowRadius: 20,
-    elevation: 16,
+    shadowRadius: 32,
+    elevation: 20,
   },
   header: {
     flexDirection: 'row',
@@ -314,8 +335,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: '#1C1C1E',
   },
   closeButton: {
     width: 32,
@@ -323,7 +344,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 99,
-    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    backgroundColor: 'rgba(120, 120, 128, 0.12)',
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
   },
   closeText: {
     fontSize: 20,
@@ -337,21 +362,24 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
+    color: '#1C1C1E',
     marginBottom: 4,
   },
   sectionDesc: {
     fontSize: 13,
-    color: '#888',
+    color: 'rgba(60, 60, 67, 0.6)',
     marginBottom: 16,
   },
   previewContainer: {
     width: '100%',
     height: 160,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 16,
-    backgroundColor: 'rgba(187, 187, 188, 0.1)',
+    backgroundColor: 'rgba(120, 120, 128, 0.08)',
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   previewImage: {
     width: '100%',
@@ -369,12 +397,28 @@ const styles = StyleSheet.create({
   languageButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    backgroundColor: 'rgba(120, 120, 128, 0.12)',
     borderRadius: 12,
     alignItems: 'center',
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.04)',
   },
   languageButtonActive: {
-    backgroundColor: '#007aff',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    // Liquid glass border
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.95)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+    borderRightColor: 'rgba(255, 255, 255, 0.4)',
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   languageButtonText: {
     fontSize: 14,
@@ -382,52 +426,84 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   languageButtonTextActive: {
-    color: '#fff',
+    color: '#222',
   },
   selectButton: {
     flex: 1,
-    paddingVertical: 12,
-    backgroundColor: '#007aff',
+    paddingVertical: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: 99,
     alignItems: 'center',
+    // Liquid glass border
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.95)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+    borderRightColor: 'rgba(255, 255, 255, 0.4)',
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   selectButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    color: '#222',
   },
   removeButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    backgroundColor: 'rgba(120, 120, 128, 0.12)',
     borderRadius: 99,
     alignItems: 'center',
+    // Liquid glass border
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.04)',
   },
   removeButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#ff3b30',
+    color: '#666',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(187, 187, 188, 0.2)',
+    backgroundColor: 'rgba(120, 120, 128, 0.15)',
     marginVertical: 20,
   },
   deleteButton: {
-    paddingVertical: 12,
-    backgroundColor: '#ff3b30',
+    paddingVertical: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: 99,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: 48,
+    // Liquid glass border
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.95)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+    borderRightColor: 'rgba(255, 255, 255, 0.4)',
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   deleteButtonDisabled: {
-    backgroundColor: 'rgba(187, 187, 188, 0.15)',
+    backgroundColor: 'rgba(120, 120, 128, 0.12)',
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.04)',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   deleteButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    color: '#222',
   },
   deleteButtonTextDisabled: {
     color: '#999',

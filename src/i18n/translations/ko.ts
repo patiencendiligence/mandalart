@@ -47,6 +47,7 @@ export const ko = {
     batchActions: '📝 {{subGoal}}을 이루기 위한 실행계획들',
     subGoalLabel: '세부목표',
     actionLabel: '실행계획',
+    fillRequired: '입력해주세요',
   },
   
   detailModal: {

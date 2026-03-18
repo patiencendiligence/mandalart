@@ -42,7 +42,9 @@ export function EditModal({
   const [text, setText] = useState('');
   const [isCompleted, setIsCompleted] = useState(false);
   const [batchTexts, setBatchTexts] = useState<string[]>(['', '', '', '', '', '', '', '']);
+  const [errorIndex, setErrorIndex] = useState<number | null>(null);
   const inputRef = useRef<TextInput>(null);
+  const inputRefs = useRef<(TextInput | null)[]>([]);
   const { t, formatText } = useTranslation();
 
   // 세부목표들이 모두 비어있는지 확인
@@ -85,6 +87,7 @@ export function EditModal({
     if (visible && selectedCell && data) {
       // 배치 입력 초기화
       setBatchTexts(['', '', '', '', '', '', '', '']);
+      setErrorIndex(null);
       
       // 현재 값 로드
       if (selectedCell.type === 'main') {
@@ -126,8 +129,17 @@ export function EditModal({
   const handleBatchSave = () => {
     if (!selectedCell) return;
     
-    const nonEmptyTexts = batchTexts.filter(t => t.trim());
-    if (nonEmptyTexts.length === 0) return;
+    // 모든 입력이 채워졌는지 확인
+    const firstEmptyIndex = batchTexts.findIndex(t => !t.trim());
+    if (firstEmptyIndex !== -1) {
+      // 첫 번째 빈 입력 필드에 에러 표시
+      setErrorIndex(firstEmptyIndex);
+      // 해당 입력 필드에 포커스
+      setTimeout(() => {
+        inputRefs.current[firstEmptyIndex]?.focus();
+      }, 100);
+      return;
+    }
 
     const batchMode = getBatchMode();
     
@@ -206,6 +218,7 @@ export function EditModal({
     const labelPrefix = batchMode === 'subGoals'
       ? (t.editModal.subGoalLabel || '세부목표') 
       : (t.editModal.actionLabel || '실행계획');
+    const errorMessage = t.editModal.fillRequired || '입력해주세요';
     
     return (
       <View style={styles.batchContainer}>
@@ -214,24 +227,38 @@ export function EditModal({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.batchScrollContent}
         >
-          {batchTexts.map((value, index) => (
-            <View key={index} style={styles.batchInputRow}>
-              <Text style={styles.batchInputLabel}>{index + 1}</Text>
-              <TextInput
-                style={styles.batchInput}
-                value={value}
-                onChangeText={(newText) => {
-                  const newBatchTexts = [...batchTexts];
-                  newBatchTexts[index] = newText;
-                  setBatchTexts(newBatchTexts);
-                }}
-                placeholder={`${labelPrefix} ${index + 1}`}
-                placeholderTextColor={MANDALART_COLORS.common.textMuted}
-                maxLength={50}
-                returnKeyType="next"
-              />
-            </View>
-          ))}
+          {batchTexts.map((value, index) => {
+            const hasError = errorIndex === index;
+            return (
+              <View key={index} style={styles.batchInputRow}>
+                <Text style={[
+                  styles.batchInputLabel,
+                  hasError && styles.batchInputLabelError
+                ]}>{index + 1}</Text>
+                <TextInput
+                  ref={(ref) => { inputRefs.current[index] = ref; }}
+                  style={[
+                    styles.batchInput,
+                    hasError && styles.batchInputError
+                  ]}
+                  value={value}
+                  onChangeText={(newText) => {
+                    const newBatchTexts = [...batchTexts];
+                    newBatchTexts[index] = newText;
+                    setBatchTexts(newBatchTexts);
+                    // 에러 상태 해제
+                    if (hasError && newText.trim()) {
+                      setErrorIndex(null);
+                    }
+                  }}
+                  placeholder={hasError ? errorMessage : `${labelPrefix} ${index + 1}`}
+                  placeholderTextColor={hasError ? '#ff3b30' : MANDALART_COLORS.common.textMuted}
+                  maxLength={50}
+                  returnKeyType="next"
+                />
+              </View>
+            );
+          })}
         </ScrollView>
         <View style={styles.batchButtonContainer}>
           <TouchableOpacity
@@ -537,6 +564,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.6)',
     outlineStyle: 'none' as any,
+  },
+  batchInputError: {
+    borderColor: '#ff3b30',
+    borderWidth: 1.5,
+    backgroundColor: 'rgba(255, 59, 48, 0.05)',
+  },
+  batchInputLabelError: {
+    color: '#ff3b30',
   },
   saveButton: {
     borderRadius: 99,
