@@ -31,3 +31,5 @@ android/.gradle/
 
 # Vercel
 .vercel/
+
+DEPLOYMENT_GUIDE.md
