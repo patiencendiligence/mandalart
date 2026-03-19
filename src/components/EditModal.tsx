@@ -432,15 +432,31 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    ...Platform.select({
+      web: {
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      default: {},
+    }),
   },
   backdrop: {
     flex: 1,
   },
   keyboardAvoid: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    ...Platform.select({
+      web: {
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      default: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+      },
+    }),
   },
   modalContainer: {
     backgroundColor: 'rgba(242, 242, 247, 0.98)',
@@ -455,9 +471,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 20,
+    ...Platform.select({
+      web: {
+        maxHeight: 650,
+        borderRadius: 24,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+        borderBottomWidth: 1.5,
+        position: 'relative' as const,
+        alignSelf: 'center',
+        width: '90%',
+        maxWidth: 400,
+      },
+      default: {},
+    }),
   },
   batchModalContainer: {
-    maxHeight: '70%',
+    maxHeight: Platform.OS === 'web' ? 650 : '70%',
     ...Platform.select({
       ios: {
         paddingBottom: 40,

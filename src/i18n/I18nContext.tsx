@@ -1,11 +1,29 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { ko, TranslationKeys } from './translations/ko';
 import { en } from './translations/en';
 
 export type Language = 'ko' | 'en';
 
 const LANGUAGE_KEY = '@mandalart_language';
+
+// 웹에서는 localStorage 직접 사용 (iframe 호환성)
+const storage = {
+  getItem: async (key: string): Promise<string | null> => {
+    if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+      return localStorage.getItem(key);
+    }
+    return AsyncStorage.getItem(key);
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, value);
+      return;
+    }
+    return AsyncStorage.setItem(key, value);
+  },
+};
 
 interface I18nContextType {
   language: Language;
@@ -34,7 +52,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
 
   const loadLanguage = async () => {
     try {
-      const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+      const savedLanguage = await storage.getItem(LANGUAGE_KEY);
       if (savedLanguage === 'ko' || savedLanguage === 'en') {
         setLanguageState(savedLanguage);
       }
@@ -47,7 +65,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
 
   const setLanguage = useCallback(async (lang: Language) => {
     try {
-      await AsyncStorage.setItem(LANGUAGE_KEY, lang);
+      await storage.setItem(LANGUAGE_KEY, lang);
       setLanguageState(lang);
     } catch (error) {
       console.error('Failed to save language setting:', error);

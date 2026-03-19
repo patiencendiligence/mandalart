@@ -7,7 +7,10 @@ import {
   TouchableOpacity,
   TextInput,
   Animated,
+  Platform,
 } from 'react-native';
+
+const useNativeDriver = Platform.OS !== 'web';
 import { MANDALART_COLORS } from '../utils/colors';
 import { Reflection } from '../types/mandalart';
 import { useTranslation } from '../i18n';
@@ -47,14 +50,14 @@ export function CelebrationModal({
       Animated.parallel([
         Animated.spring(scaleAnim, {
           toValue: 1,
-          useNativeDriver: true,
+          useNativeDriver,
           tension: 50,
           friction: 7,
         }),
         Animated.timing(opacityAnim, {
           toValue: 1,
           duration: 200,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
       ]).start();
     } else {
@@ -176,6 +179,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: '100%',
     maxWidth: 340,
+    maxHeight: 650,
     backgroundColor: '#f5f5f5',
     borderRadius: 20,
     padding: 24,

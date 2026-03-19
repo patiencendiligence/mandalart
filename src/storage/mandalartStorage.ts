@@ -1,9 +1,48 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { MandalartData, createEmptyMandalart } from '../types/mandalart';
 
 const STORAGE_KEY_PREFIX = '@mandalart_';
 const DATA_EXPIRY_YEARS = 2;
 const WARNING_MONTHS_BEFORE = 1;
+
+// 웹에서는 localStorage 직접 사용 (iframe 호환성)
+const isWeb = Platform.OS === 'web' && typeof localStorage !== 'undefined';
+
+const storage = {
+  getItem: async (key: string): Promise<string | null> => {
+    if (isWeb) {
+      return localStorage.getItem(key);
+    }
+    return AsyncStorage.getItem(key);
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    if (isWeb) {
+      localStorage.setItem(key, value);
+      return;
+    }
+    return AsyncStorage.setItem(key, value);
+  },
+  removeItem: async (key: string): Promise<void> => {
+    if (isWeb) {
+      localStorage.removeItem(key);
+      return;
+    }
+    return AsyncStorage.removeItem(key);
+  },
+  getAllKeys: async (): Promise<readonly string[]> => {
+    if (isWeb) {
+      return Object.keys(localStorage);
+    }
+    return AsyncStorage.getAllKeys();
+  },
+  multiGet: async (keys: readonly string[]): Promise<readonly [string, string | null][]> => {
+    if (isWeb) {
+      return keys.map(key => [key, localStorage.getItem(key)] as [string, string | null]);
+    }
+    return AsyncStorage.multiGet(keys);
+  },
+};
 
 // 만다라트 저장
 export async function saveMandalart(data: MandalartData): Promise<void> {
@@ -13,7 +52,7 @@ export async function saveMandalart(data: MandalartData): Promise<void> {
       ...data,
       updatedAt: new Date().toISOString(),
     });
-    await AsyncStorage.setItem(key, jsonValue);
+    await storage.setItem(key, jsonValue);
   } catch (error) {
     console.error('Failed to save mandalart:', error);
     throw error;
@@ -24,7 +63,7 @@ export async function saveMandalart(data: MandalartData): Promise<void> {
 export async function loadMandalart(id: string): Promise<MandalartData | null> {
   try {
     const key = `${STORAGE_KEY_PREFIX}${id}`;
-    const jsonValue = await AsyncStorage.getItem(key);
+    const jsonValue = await storage.getItem(key);
     return jsonValue != null ? JSON.parse(jsonValue) : null;
   } catch (error) {
     console.error('Failed to load mandalart:', error);
@@ -53,9 +92,9 @@ export async function loadOrCreateMandalart(
 // 모든 만다라트 목록 조회
 export async function getAllMandalarts(): Promise<MandalartData[]> {
   try {
-    const keys = await AsyncStorage.getAllKeys();
+    const keys = await storage.getAllKeys();
     const mandalartKeys = keys.filter(key => key.startsWith(STORAGE_KEY_PREFIX));
-    const items = await AsyncStorage.multiGet(mandalartKeys);
+    const items = await storage.multiGet(mandalartKeys);
     
     const results: MandalartData[] = [];
     for (const [key, value] of items) {
@@ -68,7 +107,7 @@ export async function getAllMandalarts(): Promise<MandalartData[]> {
       } catch (parseError) {
         console.warn(`Invalid JSON for key ${key}, removing corrupted data`);
         // 손상된 데이터 삭제
-        await AsyncStorage.removeItem(key);
+        await storage.removeItem(key);
       }
     }
     
@@ -85,7 +124,7 @@ export async function getAllMandalarts(): Promise<MandalartData[]> {
 export async function deleteMandalart(id: string): Promise<void> {
   try {
     const key = `${STORAGE_KEY_PREFIX}${id}`;
-    await AsyncStorage.removeItem(key);
+    await storage.removeItem(key);
   } catch (error) {
     console.error('Failed to delete mandalart:', error);
     throw error;
@@ -217,7 +256,7 @@ export async function shouldShowExpiryWarning(): Promise<boolean> {
       return false;
     }
 
-    const lastShownMonth = await AsyncStorage.getItem(WARNING_SHOWN_KEY);
+    const lastShownMonth = await storage.getItem(WARNING_SHOWN_KEY);
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM 형식
     
     // 이번 달에 이미 표시했으면 표시하지 않음
@@ -236,7 +275,7 @@ export async function shouldShowExpiryWarning(): Promise<boolean> {
 export async function markWarningShown(): Promise<void> {
   try {
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM 형식
-    await AsyncStorage.setItem(WARNING_SHOWN_KEY, currentMonth);
+    await storage.setItem(WARNING_SHOWN_KEY, currentMonth);
   } catch (error) {
     console.error('Failed to mark warning shown:', error);
   }

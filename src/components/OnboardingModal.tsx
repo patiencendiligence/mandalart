@@ -15,6 +15,8 @@ import { MANDALART_COLORS } from '../utils/colors';
 import { useTranslation } from '../i18n';
 import React from 'react';
 
+const useNativeDriver = Platform.OS !== 'web';
+
 interface OnboardingModalProps {
   visible: boolean;
   period: 'monthly' | 'yearly';
@@ -63,7 +65,7 @@ export function OnboardingModal({
           toValue: 1,
           duration: 1500,
           easing: Easing.linear,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
       );
       rippleLoopsRef.current[i] = loop;
@@ -81,13 +83,13 @@ export function OnboardingModal({
           toValue: 1,
           duration: 1200,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
+          useNativeDriver,
         }),
         Animated.timing(pulseAnim, {
           toValue: 0,
           duration: 1200,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
+          useNativeDriver,
         }),
       ]),
     );
@@ -114,8 +116,8 @@ export function OnboardingModal({
     setMainGoal('');
   };
 
-  const handlePressIn = () => Animated.spring(pressScale, { toValue: 1.1, useNativeDriver: true }).start();
-  const handlePressOut = () => Animated.spring(pressScale, { toValue: 1, useNativeDriver: true }).start();
+  const handlePressIn = () => Animated.spring(pressScale, { toValue: 1.1, useNativeDriver }).start();
+  const handlePressOut = () => Animated.spring(pressScale, { toValue: 1, useNativeDriver }).start();
 
   return (
     <Modal visible={visible} transparent animationType="fade" >

@@ -8,6 +8,7 @@ import {
   Platform,
   Image,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { getPastMandalarts, deletePastMandalarts } from '../storage/mandalartStorage';
@@ -140,7 +141,7 @@ export function SettingsModal({
             </TouchableOpacity>
           </View>
 
-          <View style={styles.content}>
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
             {/* 언어 설정 섹션 */}
             <Text style={styles.sectionTitle}>{t.settingsModal.language}</Text>
             <Text style={styles.sectionDesc}>
@@ -263,7 +264,7 @@ export function SettingsModal({
                 </Text>
               )}
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -313,6 +314,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     width: '90%',
     maxWidth: 360,
+    maxHeight: 650,
     overflow: 'hidden',
     // Liquid glass border
     borderWidth: 1,
@@ -358,6 +360,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     paddingTop: 0,
+    paddingBottom: 24,
   },
   sectionTitle: {
     fontSize: 15,

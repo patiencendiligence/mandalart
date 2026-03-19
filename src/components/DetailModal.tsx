@@ -113,8 +113,8 @@ export function DetailModal({
           style={[
             styles.modalContainer,
             {
-              width: modalWidth,
-              maxHeight: windowHeight * 0.85,
+              width: Platform.OS === 'web' ? Math.min(modalWidth, 400) : modalWidth,
+              maxHeight: Platform.OS === 'web' ? 650 : windowHeight * 0.85,
             },
           ]}
         >

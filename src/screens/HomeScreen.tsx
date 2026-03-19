@@ -265,43 +265,33 @@ export function HomeScreen() {
     await updateMainGoal(mainGoal);
   }, [updateMainGoal]);
 
-  return (
+  // 웹 전용 레이아웃 (크롬 확장프로그램 새 탭)
+  const isWeb = Platform.OS === 'web';
+
+  const mainContent = (
     <>
-      <OnboardingModal
-        visible={shouldShowOnboarding}
-        period={period}
-        year={year}
-        month={month}
-        onSubmit={handleOnboardingSubmit}
-        onClose={() => setOnboardingVisible(false)}
-      />
-      <SafeAreaView style={styles.container}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor={MANDALART_COLORS.common.background}
-        />
+      {/* 헤더 */}
+      <View style={[styles.header, isWeb && styles.webCentered]}>
+        <Text style={styles.headerSubtitle}>
+          {period === "yearly"
+            ? formatText(t.homeScreen.yearlyGoal, { year })
+            : (language === 'ko'
+                ? formatText(t.homeScreen.monthlyGoal, { year, month })
+                : formatText(t.homeScreen.monthlyGoal, { year, month: getMonthName(month) }))}
+        </Text>
+        {saving && (
+          <View style={styles.savingIndicator}>
+            <ActivityIndicator
+              size="small"
+              color={MANDALART_COLORS.common.success}
+            />
+            <Text style={styles.savingText}>{t.common.saving}</Text>
+          </View>
+        )}
+      </View>
 
-        {/* 헤더 */}
-        <View style={styles.header}>
-          <Text style={styles.headerSubtitle}>
-            {period === "yearly"
-              ? formatText(t.homeScreen.yearlyGoal, { year })
-              : (language === 'ko'
-                  ? formatText(t.homeScreen.monthlyGoal, { year, month })
-                  : formatText(t.homeScreen.monthlyGoal, { year, month: getMonthName(month) }))}
-          </Text>
-          {saving && (
-            <View style={styles.savingIndicator}>
-              <ActivityIndicator
-                size="small"
-                color={MANDALART_COLORS.common.success}
-              />
-              <Text style={styles.savingText}>{t.common.saving}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* 기간 선택: 항상 렌더링 */}
+      {/* 기간 선택: 항상 렌더링 */}
+      <View style={isWeb && styles.webCentered}>
         <PeriodSelector
           period={period}
           year={year}
@@ -312,125 +302,157 @@ export function HomeScreen() {
           onInfoPress={() => setInfoModalVisible(true)}
           onSettingsPress={() => setSettingsModalVisible(true)}
         />
+      </View>
 
-        {/* 메인 그리드 */}
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator
-              size="large"
-              color={MANDALART_COLORS.common.text}
-            />
-            <Text style={styles.loadingText}>{t.common.loading}</Text>
-          </View>
-        ) : !shouldShowOnboarding && data ? (
-          <ImageBackground
-            source={backgroundImage ? { uri: backgroundImage } : undefined}
-            style={styles.backgroundContainer}
-            resizeMode="cover"
-          >
-            <MandalartGrid
-              data={data}
-              onCellPress={handleCellPress}
-              onSubGoalGridPress={handleSubGoalGridPress}
-            />
-            {/* 이미지 다운로드 버튼 (완료 시에만 표시) */}
-            {isAllCompleted && data?.reflection && (
-              <View style={styles.downloadButtonContainer}>
-                <TouchableOpacity
-                  style={styles.downloadButton}
-                  onPress={handleDownloadImage}
-                  accessibilityRole="button"
-                  accessibilityLabel={t.homeScreen.downloadImage}
-                >
-                  <Text style={styles.downloadButtonText}>
-                    {t.homeScreen.downloadImage}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </ImageBackground>
-        ) : !shouldShowOnboarding ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{t.common.error}</Text>
-          </View>
-        ) : (
-          <View style={styles.emptyContainer} />
-        )}
-
-        {/* 상세 모달 (줌인 뷰) */}
-        <DetailModal
-          visible={detailModalVisible}
-          subGoal={data?.subGoals[selectedSubGoalIndex] ?? null}
-          subGoalIndex={selectedSubGoalIndex}
-          onClose={handleCloseDetailModal}
-          onCellPress={handleDetailCellPress}
-          onCompleteAll={handleCompleteAllActions}
-        />
-
-        {/* 정보 모달 */}
-        <InfoModal
-          visible={infoModalVisible}
-          onClose={() => setInfoModalVisible(false)}
-        />
-
-        {/* 편집 모달 - 가장 마지막에 렌더링하여 최상위에 표시 */}
-        <EditModal
-          visible={editModalVisible}
-          selectedCell={selectedCell}
-          data={data}
-          onClose={handleCloseEditModal}
-          onSaveMain={handleSaveMain}
-          onSaveSubGoal={handleSaveSubGoal}
-          onSaveAction={handleSaveAction}
-          onToggleComplete={handleToggleComplete}
-          onSaveAllSubGoals={handleSaveAllSubGoals}
-          onSaveAllActions={handleSaveAllActions}
-        />
-
-        {/* 축하 모달 - 모든 목표 완료 시 */}
-        <CelebrationModal
-          visible={celebrationModalVisible}
-          year={year}
-          month={month}
-          onSave={handleSaveReflection}
-        />
-
-        {/* 이미지 내보내기 모달 */}
-        {exportModalVisible && data && (
-          <MandalartImageExport
-            data={data}
-            onClose={() => setExportModalVisible(false)}
-            backgroundImage={backgroundImage}
+      {/* 메인 그리드 */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator
+            size="large"
+            color={MANDALART_COLORS.common.text}
           />
-        )}
+          <Text style={styles.loadingText}>{t.common.loading}</Text>
+        </View>
+      ) : !shouldShowOnboarding && data ? (
+        <View style={[styles.gridWrapper, isWeb && styles.webCentered]}>
+          <MandalartGrid
+            data={data}
+            onCellPress={handleCellPress}
+            onSubGoalGridPress={handleSubGoalGridPress}
+          />
+          {/* 이미지 다운로드 버튼 (완료 시에만 표시) */}
+          {isAllCompleted && data?.reflection && (
+            <View style={styles.downloadButtonContainer}>
+              <TouchableOpacity
+                style={styles.downloadButton}
+                onPress={handleDownloadImage}
+                accessibilityRole="button"
+                accessibilityLabel={t.homeScreen.downloadImage}
+              >
+                <Text style={styles.downloadButtonText}>
+                  {t.homeScreen.downloadImage}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      ) : !shouldShowOnboarding ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{t.common.error}</Text>
+        </View>
+      ) : (
+        <View style={styles.emptyContainer} />
+      )}
+    </>
+  );
 
-        {/* 설정 모달 */}
-        <SettingsModal
-          visible={settingsModalVisible}
-          onClose={() => setSettingsModalVisible(false)}
+  return (
+    <>
+      <OnboardingModal
+        visible={shouldShowOnboarding}
+        period={period}
+        year={year}
+        month={month}
+        onSubmit={handleOnboardingSubmit}
+        onClose={() => setOnboardingVisible(false)}
+      />
+      {isWeb ? (
+        <ImageBackground
+          source={backgroundImage ? { uri: backgroundImage } : undefined}
+          style={styles.webBackgroundFull}
+          resizeMode="cover"
+        >
+          <SafeAreaView style={styles.webContainer}>
+            <StatusBar
+              barStyle="light-content"
+              backgroundColor="transparent"
+            />
+            {mainContent}
+          </SafeAreaView>
+        </ImageBackground>
+      ) : (
+        <SafeAreaView style={styles.container}>
+          <StatusBar
+            barStyle="light-content"
+            backgroundColor={MANDALART_COLORS.common.background}
+          />
+          {mainContent}
+        </SafeAreaView>
+      )}
+
+      {/* 상세 모달 (줌인 뷰) */}
+      <DetailModal
+        visible={detailModalVisible}
+        subGoal={data?.subGoals[selectedSubGoalIndex] ?? null}
+        subGoalIndex={selectedSubGoalIndex}
+        onClose={handleCloseDetailModal}
+        onCellPress={handleDetailCellPress}
+        onCompleteAll={handleCompleteAllActions}
+      />
+
+      {/* 정보 모달 */}
+      <InfoModal
+        visible={infoModalVisible}
+        onClose={() => setInfoModalVisible(false)}
+      />
+
+      {/* 편집 모달 - 가장 마지막에 렌더링하여 최상위에 표시 */}
+      <EditModal
+        visible={editModalVisible}
+        selectedCell={selectedCell}
+        data={data}
+        onClose={handleCloseEditModal}
+        onSaveMain={handleSaveMain}
+        onSaveSubGoal={handleSaveSubGoal}
+        onSaveAction={handleSaveAction}
+        onToggleComplete={handleToggleComplete}
+        onSaveAllSubGoals={handleSaveAllSubGoals}
+        onSaveAllActions={handleSaveAllActions}
+      />
+
+      {/* 축하 모달 - 모든 목표 완료 시 */}
+      <CelebrationModal
+        visible={celebrationModalVisible}
+        year={year}
+        month={month}
+        onSave={handleSaveReflection}
+      />
+
+      {/* 이미지 내보내기 모달 */}
+      {exportModalVisible && data && (
+        <MandalartImageExport
+          data={data}
+          onClose={() => setExportModalVisible(false)}
           backgroundImage={backgroundImage}
-          onImageSelect={handleBackgroundImageChange}
-          onDataDeleted={() => {
-            // 데이터 삭제 후 필요한 경우 리로드
-          }}
         />
+      )}
 
-        {/* 만료 경고 모달 */}
-        <ExpiryWarningModal
-          visible={expiryWarningVisible}
-          expiringData={expiringData}
-          onClose={handleCloseExpiryWarning}
-        />
+      {/* 설정 모달 */}
+      <SettingsModal
+        visible={settingsModalVisible}
+        onClose={() => setSettingsModalVisible(false)}
+        backgroundImage={backgroundImage}
+        onImageSelect={handleBackgroundImageChange}
+        onDataDeleted={() => {
+          // 데이터 삭제 후 필요한 경우 리로드
+        }}
+      />
 
-        {/* 최종목표 필요 알림 모달 */}
-        <AlertModal
-          visible={alertModalVisible}
-          title={t.homeScreen.mainGoalRequired || '최종목표 필요'}
-          message={t.homeScreen.mainGoalRequiredMessage || '먼저 최종목표를 입력해주세요.'}
-          buttons={[{ text: t.common.confirm || '확인', style: 'default' }]}
-          onClose={() => setAlertModalVisible(false)}
-        />
-      </SafeAreaView>
+      {/* 만료 경고 모달 */}
+      <ExpiryWarningModal
+        visible={expiryWarningVisible}
+        expiringData={expiringData}
+        onClose={handleCloseExpiryWarning}
+      />
+
+      {/* 최종목표 필요 알림 모달 */}
+      <AlertModal
+        visible={alertModalVisible}
+        title={t.homeScreen.mainGoalRequired || '최종목표 필요'}
+        message={t.homeScreen.mainGoalRequiredMessage || '먼저 최종목표를 입력해주세요.'}
+        buttons={[{ text: t.common.confirm || '확인', style: 'default' }]}
+        onClose={() => setAlertModalVisible(false)}
+      />
     </>
   );
 }
@@ -439,6 +461,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: MANDALART_COLORS.common.background,
+  },
+  // 웹 전용 스타일
+  webBackgroundFull: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  webContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  webCentered: {
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  gridWrapper: {
+    flex: 1,
   },
   header: {
     paddingHorizontal: 20,

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, useWindowDimensions, ImageBackground, Platform } from 'react-native';
 import { Cell } from './Cell';
 import { MandalartData } from '../types/mandalart';
+import { useTranslation } from '../i18n';
 
 
 interface MandalartGridProps {
@@ -53,6 +54,7 @@ export function MandalartGrid({
   onSubGoalGridPress,
   backgroundImage,
 }: MandalartGridProps) {
+  const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
   
   // 반응형 크기 계산
@@ -156,7 +158,7 @@ export function MandalartGrid({
           
           {/* 완료 체크 */}
           <View style={styles.completedBadge}>
-            <Text style={styles.completedBadgeText}>✓ 완료</Text>
+            <Text style={styles.completedBadgeText}>✓ {t.common.completed}</Text>
           </View>
         </View>
       </View>
