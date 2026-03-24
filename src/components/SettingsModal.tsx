@@ -403,6 +403,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(120, 120, 128, 0.12)',
     borderRadius: 12,
     alignItems: 'center',
+    overflow: 'hidden',
     // Liquid glass border
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.5)',
@@ -410,18 +411,29 @@ const styles = StyleSheet.create({
   },
   languageButtonActive: {
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    // Liquid glass border
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.95)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
-    borderRightColor: 'rgba(255, 255, 255, 0.4)',
-    // Shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    ...Platform.select({
+      android: {
+        // Android에서는 glass shadow/border 조합이 내부 흰 네모 아티팩트를 만들 수 있어 단순화
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.65)',
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+      default: {
+        // Liquid glass border
+        borderWidth: 2,
+        borderTopColor: 'rgba(255, 255, 255, 0.95)',
+        borderLeftColor: 'rgba(255, 255, 255, 0.6)',
+        borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+        borderRightColor: 'rgba(255, 255, 255, 0.4)',
+        // Shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+        elevation: 8,
+      },
+    }),
   },
   languageButtonText: {
     fontSize: 14,

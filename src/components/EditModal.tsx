@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import { SelectedCell, MandalartData } from '../types/mandalart';
 import { MANDALART_COLORS, getSubGoalColor } from '../utils/colors';
@@ -46,6 +47,7 @@ export function EditModal({
   const inputRef = useRef<TextInput>(null);
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const { t, formatText } = useTranslation();
+  const { height: windowHeight } = useWindowDimensions();
 
   // 세부목표들이 모두 비어있는지 확인
   const areAllSubGoalsEmpty = data?.subGoals.every(sg => !sg.text?.trim()) ?? true;
@@ -221,45 +223,48 @@ export function EditModal({
     const errorMessage = t.editModal.fillRequired || '입력해주세요';
     
     return (
-      <View style={styles.batchContainer}>
-        <ScrollView 
-          style={styles.batchScrollView} 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.batchScrollContent}
-        >
-          {batchTexts.map((value, index) => {
-            const hasError = errorIndex === index;
-            return (
-              <View key={index} style={styles.batchInputRow}>
-                <Text style={[
-                  styles.batchInputLabel,
-                  hasError && styles.batchInputLabelError
-                ]}>{index + 1}</Text>
-                <TextInput
-                  ref={(ref) => { inputRefs.current[index] = ref; }}
-                  style={[
-                    styles.batchInput,
-                    hasError && styles.batchInputError
-                  ]}
-                  value={value}
-                  onChangeText={(newText) => {
-                    const newBatchTexts = [...batchTexts];
-                    newBatchTexts[index] = newText;
-                    setBatchTexts(newBatchTexts);
-                    // 에러 상태 해제
-                    if (hasError && newText.trim()) {
-                      setErrorIndex(null);
-                    }
-                  }}
-                  placeholder={hasError ? errorMessage : `${labelPrefix} ${index + 1}`}
-                  placeholderTextColor={hasError ? '#ff3b30' : MANDALART_COLORS.common.textMuted}
-                  maxLength={50}
-                  returnKeyType="next"
-                />
-              </View>
-            );
-          })}
-        </ScrollView>
+      <>
+        <View style={styles.batchContainer}>
+          <ScrollView 
+            style={styles.batchScrollView} 
+            showsVerticalScrollIndicator
+            contentContainerStyle={styles.batchScrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            {batchTexts.map((value, index) => {
+              const hasError = errorIndex === index;
+              return (
+                <View key={index} style={styles.batchInputRow}>
+                  <Text style={[
+                    styles.batchInputLabel,
+                    hasError && styles.batchInputLabelError
+                  ]}>{index + 1}</Text>
+                  <TextInput
+                    ref={(ref) => { inputRefs.current[index] = ref; }}
+                    style={[
+                      styles.batchInput,
+                      hasError && styles.batchInputError
+                    ]}
+                    value={value}
+                    onChangeText={(newText) => {
+                      const newBatchTexts = [...batchTexts];
+                      newBatchTexts[index] = newText;
+                      setBatchTexts(newBatchTexts);
+                      // 에러 상태 해제
+                      if (hasError && newText.trim()) {
+                        setErrorIndex(null);
+                      }
+                    }}
+                    placeholder={hasError ? errorMessage : `${labelPrefix} ${index + 1}`}
+                    placeholderTextColor={hasError ? '#ff3b30' : MANDALART_COLORS.common.textMuted}
+                    maxLength={50}
+                    returnKeyType="next"
+                  />
+                </View>
+              );
+            })}
+          </ScrollView>
+        </View>
         <View style={styles.batchButtonContainer}>
           <TouchableOpacity
             style={[styles.saveButton, styles.batchSaveButton]}
@@ -270,9 +275,14 @@ export function EditModal({
             <Text style={styles.saveButtonText}>{t.common.save}</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </>
     );
   };
+
+  const batchModalHeight = Math.max(
+    480,
+    Math.floor(windowHeight * 0.78),
+  );
 
   const renderSingleInput = () => (
     <>
@@ -391,6 +401,8 @@ export function EditModal({
       transparent
       animationType="fade"
       onRequestClose={onClose}
+      statusBarTranslucent={Platform.OS === 'android'}
+      navigationBarTranslucent={Platform.OS === 'android'}
     >
       <View style={styles.overlay}>
         <TouchableOpacity
@@ -403,7 +415,13 @@ export function EditModal({
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardAvoid}
         >
-          <View style={[styles.modalContainer, isBatchMode && styles.batchModalContainer]}>
+          <View
+            style={[
+              styles.modalContainer,
+              isBatchMode && styles.batchModalContainer,
+              isBatchMode && { height: batchModalHeight },
+            ]}
+          >
             <View style={[styles.header, { backgroundColor: colors.bg }]}>
               <Text style={styles.title}>
                 {isBatchMode ? getBatchTitle() : getTitle()}
@@ -452,9 +470,11 @@ const styles = StyleSheet.create({
       },
       default: {
         position: 'absolute',
+        top: 0,
         bottom: 0,
         left: 0,
         right: 0,
+        justifyContent: 'flex-end',
       },
     }),
   },
@@ -462,6 +482,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(242, 242, 247, 0.98)',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0,
+    borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.8)',
@@ -471,6 +493,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 20,
+    overflow: 'hidden',
     ...Platform.select({
       web: {
         maxHeight: 650,
@@ -487,13 +510,15 @@ const styles = StyleSheet.create({
     }),
   },
   batchModalContainer: {
-    maxHeight: Platform.OS === 'web' ? 650 : '70%',
+    height: Platform.OS === 'web' ? undefined : '78%',
+    maxHeight: Platform.OS === 'web' ? 650 : undefined,
+    minHeight: Platform.OS === 'web' ? undefined : 480,
     ...Platform.select({
       ios: {
         paddingBottom: 40,
       },
       android: {
-        paddingBottom: 30,
+        paddingBottom: 10,
       },
       default: {},
     }),
@@ -538,6 +563,7 @@ const styles = StyleSheet.create({
   batchContent: {
     paddingBottom: 0,
     flex: 1,
+    minHeight: 0,
   },
   input: {
     backgroundColor: 'rgba(240, 240, 242, 0.8)',
@@ -559,18 +585,23 @@ const styles = StyleSheet.create({
   },
   batchContainer: {
     flex: 1,
+    minHeight: 0,
     maxHeight: Platform.OS === 'web' ? 500 : undefined,
   },
   batchScrollView: {
     flex: 1,
-    maxHeight: Platform.OS === 'web' ? 400 : 350,
+    minHeight: 0,
+    maxHeight: Platform.OS === 'web' ? 400 : undefined,
   },
   batchScrollContent: {
-    paddingBottom: 10,
+    paddingBottom: 16,
   },
   batchButtonContainer: {
     paddingTop: 10,
-    paddingBottom: Platform.OS === 'ios' ? 10 : 20,
+    paddingBottom: Platform.OS === 'ios' ? 10 : 14,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(242, 242, 247, 0.96)',
   },
   batchInputRow: {
     flexDirection: 'row',
