@@ -10,6 +10,7 @@ import {
   ImageBackground,
   Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MandalartGrid } from '../components/MandalartGrid';
 import { EditModal } from '../components/EditModal';
 import { DetailModal } from '../components/DetailModal';
@@ -80,12 +81,26 @@ export function HomeScreen() {
 
   // 배경 이미지 로드/저장
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      const saved = localStorage.getItem(BACKGROUND_IMAGE_KEY);
-      if (saved) {
-        setBackgroundImage(saved);
+    const loadBackgroundImage = async () => {
+      if (Platform.OS === 'web') {
+        const saved = localStorage.getItem(BACKGROUND_IMAGE_KEY);
+        if (saved) {
+          setBackgroundImage(saved);
+        }
+        return;
       }
-    }
+
+      try {
+        const saved = await AsyncStorage.getItem(BACKGROUND_IMAGE_KEY);
+        if (saved) {
+          setBackgroundImage(saved);
+        }
+      } catch (error) {
+        console.error('Failed to load background image:', error);
+      }
+    };
+
+    loadBackgroundImage();
   }, []);
 
   // 앱 시작 시 만료 데이터 체크 및 처리
@@ -117,7 +132,7 @@ export function HomeScreen() {
     await markWarningShown();
   }, []);
 
-  const handleBackgroundImageChange = useCallback((imageUri: string | null) => {
+  const handleBackgroundImageChange = useCallback(async (imageUri: string | null) => {
     setBackgroundImage(imageUri);
     if (Platform.OS === 'web') {
       if (imageUri) {
@@ -125,6 +140,17 @@ export function HomeScreen() {
       } else {
         localStorage.removeItem(BACKGROUND_IMAGE_KEY);
       }
+      return;
+    }
+
+    try {
+      if (imageUri) {
+        await AsyncStorage.setItem(BACKGROUND_IMAGE_KEY, imageUri);
+      } else {
+        await AsyncStorage.removeItem(BACKGROUND_IMAGE_KEY);
+      }
+    } catch (error) {
+      console.error('Failed to save background image:', error);
     }
   }, []);
   
@@ -371,13 +397,25 @@ export function HomeScreen() {
           </SafeAreaView>
         </ImageBackground>
       ) : (
-        <SafeAreaView style={styles.container}>
-          <StatusBar
-            barStyle="light-content"
-            backgroundColor={MANDALART_COLORS.common.background}
-          />
-          {mainContent}
-        </SafeAreaView>
+        <ImageBackground
+          source={backgroundImage ? { uri: backgroundImage } : undefined}
+          style={styles.backgroundContainer}
+          resizeMode="cover"
+        >
+          <SafeAreaView
+            style={[
+              styles.container,
+              backgroundImage && styles.containerTransparent,
+            ]}
+          >
+            <StatusBar
+              barStyle="light-content"
+              backgroundColor="transparent"
+              translucent={!!backgroundImage}
+            />
+            {mainContent}
+          </SafeAreaView>
+        </ImageBackground>
       )}
 
       {/* 상세 모달 (줌인 뷰) */}
@@ -461,6 +499,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: MANDALART_COLORS.common.background,
+  },
+  containerTransparent: {
+    backgroundColor: 'transparent',
   },
   // 웹 전용 스타일
   webBackgroundFull: {
