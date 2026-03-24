@@ -9,7 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  useWindowDimensions,
 } from 'react-native';
 import { SelectedCell, MandalartData } from '../types/mandalart';
 import { MANDALART_COLORS, getSubGoalColor } from '../utils/colors';
@@ -47,7 +46,6 @@ export function EditModal({
   const inputRef = useRef<TextInput>(null);
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const { t, formatText } = useTranslation();
-  const { height: windowHeight } = useWindowDimensions();
 
   // 세부목표들이 모두 비어있는지 확인
   const areAllSubGoalsEmpty = data?.subGoals.every(sg => !sg.text?.trim()) ?? true;
@@ -279,11 +277,6 @@ export function EditModal({
     );
   };
 
-  const batchModalHeight = Math.max(
-    480,
-    Math.floor(windowHeight * 0.78),
-  );
-
   const renderSingleInput = () => (
     <>
       <TextInput
@@ -399,10 +392,9 @@ export function EditModal({
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType={Platform.OS === 'android' ? 'none' : 'fade'}
       onRequestClose={onClose}
-      statusBarTranslucent={Platform.OS === 'android'}
-      navigationBarTranslucent={Platform.OS === 'android'}
+      hardwareAccelerated={Platform.OS === 'android'}
     >
       <View style={styles.overlay}>
         <TouchableOpacity
@@ -412,14 +404,13 @@ export function EditModal({
         />
 
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.keyboardAvoid}
         >
           <View
             style={[
               styles.modalContainer,
               isBatchMode && styles.batchModalContainer,
-              isBatchMode && { height: batchModalHeight },
             ]}
           >
             <View style={[styles.header, { backgroundColor: colors.bg }]}>
@@ -479,22 +470,26 @@ const styles = StyleSheet.create({
     }),
   },
   modalContainer: {
-    backgroundColor: 'rgba(242, 242, 247, 0.98)',
+    backgroundColor: Platform.OS === 'android' ? '#F2F2F7' : 'rgba(242, 242, 247, 0.98)',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0,
     borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderWidth: Platform.OS === 'android' ? 0 : 1.5,
+    borderColor: Platform.OS === 'android' ? 'transparent' : 'rgba(255, 255, 255, 0.8)',
     borderBottomWidth: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 20,
-    overflow: 'hidden',
+    overflow: Platform.OS === 'android' ? 'visible' : 'hidden',
     ...Platform.select({
+      android: {
+        // Android에서는 elevation + clipping 조합이 입력 포커스 시 깜빡임을 유발할 수 있음
+        elevation: 0,
+        shadowOpacity: 0,
+      },
       web: {
         maxHeight: 650,
         borderRadius: 24,
@@ -529,7 +524,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 24,
     paddingVertical: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: Platform.OS === 'android' ? '#EDEDF2' : 'rgba(255, 255, 255, 0.3)',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
   },
@@ -544,14 +539,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 99,
-    backgroundColor: 'rgba(240, 240, 242, 0.8)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.6)',
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Platform.OS === 'android' ? '#E4E4E8' : 'rgba(240, 240, 242, 0.8)',
+    borderWidth: Platform.OS === 'android' ? 0 : 1,
+    borderColor: Platform.OS === 'android' ? 'transparent' : 'rgba(255, 255, 255, 0.6)',
+    ...Platform.select({
+      android: {
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+      default: {
+        shadowColor: 'rgba(0, 0, 0, 0.1)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 3,
+      },
+    }),
   },
   closeText: {
     fontSize: 16,
@@ -566,7 +569,7 @@ const styles = StyleSheet.create({
     minHeight: 0,
   },
   input: {
-    backgroundColor: 'rgba(240, 240, 242, 0.8)',
+    backgroundColor: Platform.OS === 'android' ? '#FFFFFF' : 'rgba(240, 240, 242, 0.8)',
     borderRadius: 16,
     padding: 16,
     fontSize: 16,
@@ -575,12 +578,20 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.6)',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
+    borderColor: Platform.OS === 'android' ? '#D8D8DE' : 'rgba(255, 255, 255, 0.6)',
+    ...Platform.select({
+      android: {
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+      default: {
+        shadowColor: 'rgba(0, 0, 0, 0.08)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 6,
+        elevation: 2,
+      },
+    }),
     outlineStyle: 'none' as any,
   },
   batchContainer: {
@@ -600,8 +611,8 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: Platform.OS === 'ios' ? 10 : 14,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.7)',
-    backgroundColor: 'rgba(242, 242, 247, 0.96)',
+    borderTopColor: Platform.OS === 'android' ? '#DBDBE2' : 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: Platform.OS === 'android' ? '#F2F2F7' : 'rgba(242, 242, 247, 0.96)',
   },
   batchInputRow: {
     flexDirection: 'row',
@@ -617,13 +628,13 @@ const styles = StyleSheet.create({
   },
   batchInput: {
     flex: 1,
-    backgroundColor: 'rgba(240, 240, 242, 0.8)',
+    backgroundColor: Platform.OS === 'android' ? '#FFFFFF' : 'rgba(240, 240, 242, 0.8)',
     borderRadius: 12,
     padding: 12,
     fontSize: 15,
     color: '#333',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.6)',
+    borderColor: Platform.OS === 'android' ? '#D8D8DE' : 'rgba(255, 255, 255, 0.6)',
     outlineStyle: 'none' as any,
   },
   batchInputError: {
@@ -640,17 +651,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: 'center',
     marginTop: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.95)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
-    borderRightColor: 'rgba(255, 255, 255, 0.4)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    backgroundColor: Platform.OS === 'android' ? '#E4E4E8' : 'rgba(255, 255, 255, 0.25)',
+    borderWidth: Platform.OS === 'android' ? 1 : 2,
+    borderTopColor: Platform.OS === 'android' ? '#CCCCD4' : 'rgba(255, 255, 255, 0.95)',
+    borderLeftColor: Platform.OS === 'android' ? '#CCCCD4' : 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: Platform.OS === 'android' ? '#CCCCD4' : 'rgba(255, 255, 255, 0.3)',
+    borderRightColor: Platform.OS === 'android' ? '#CCCCD4' : 'rgba(255, 255, 255, 0.4)',
+    ...Platform.select({
+      android: {
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+        elevation: 8,
+      },
+    }),
   },
   batchSaveButton: {
     marginTop: 6,
