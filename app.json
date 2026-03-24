@@ -2,7 +2,7 @@
   "expo": {
     "name": "만다라트",
     "slug": "mandalart-app",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -38,7 +38,7 @@
         "backgroundColor": "#e8e8e9"
       },
       "package": "com.mandalart.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": []
     },
     "web": {
