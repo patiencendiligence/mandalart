@@ -11,7 +11,7 @@
 
 ## 사용해보기
 
-- **웹**: [https://mandalart-.vercel.app](https://mandart-planner.vercel.app/)
+- **웹**: [https://mandalart-planner.vercel.app](https://mandart-planner.vercel.app/)
 - **앱**: 앱스토어 / 구글 플레이 등록중
 - **크롬확장프로그램**: 등록중
 
@@ -149,7 +149,7 @@ A goal planning app utilizing the **Mandalart** technique, made famous by Shohei
 
 ## Try It Out
 
-- **Web**: https://dist-pi-sepia.vercel.app
+- **Web**: [https://mandalart-planner.vercel.app](https://mandart-planner.vercel.app/)
 - **App**: Coming soon to App Store / Google Play
 - **Chrome Extension**: Coming soon
 
